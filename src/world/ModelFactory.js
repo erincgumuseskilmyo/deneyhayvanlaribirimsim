@@ -305,6 +305,9 @@ export class ModelFactory {
       group.add(pipe);
     }
 
+    // Hayvanların yerleştirileceği üst yüzey — sabit sayı yerine geometriden
+    group.userData.topY = h + 0.07;
+
     group.position.copy(localPos);
     return group;
   }

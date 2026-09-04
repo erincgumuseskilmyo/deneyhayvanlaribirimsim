@@ -130,7 +130,10 @@ export class WorldRenderer {
       if (!cageMesh) continue;
       const mesh = this.factory.buildAnimal(a);
       const idx = (perCageIndex(this.animalMeshes, a.cageId, this.state));
-      mesh.position.set((idx - 1) * 0.14, 0.2, (idx % 2) * 0.1 - 0.05);
+      // Kafesin üst yüzeyine otur: sabit bir yükseklik, harici modellerde
+      // hayvanın kapağın içine gömülmesine yol açıyordu.
+      const topY = cageMesh.userData.topY ?? 0.33;
+      mesh.position.set((idx - 1) * 0.14, topY, (idx % 2) * 0.1 - 0.05);
       mesh.rotation.y = Math.random() * Math.PI * 2;
       mesh.userData.wander = { phase: Math.random() * Math.PI * 2, cageId: a.cageId };
       cageMesh.add(mesh);
