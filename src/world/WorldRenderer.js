@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { getRoomType } from '../data/rooms.js';
+import { getSpecies } from '../data/species.js';
 
 /**
  * Oyun durumunu (GameState) 3B sahneye yansıtır.
@@ -22,6 +23,21 @@ export class WorldRenderer {
 
     bus.on('facility:changed', () => this.sync());
     bus.on('room:built', () => this.sync());
+  }
+
+  /**
+   * Harici modeller sonradan yüklendiğinde mevcut mesh'leri atıp yeniden kurar.
+   * (Manifest asenkron yüklendiği için sahne çoktan çizilmiş olabilir.)
+   */
+  reloadModels() {
+    for (const map of [this.animalMeshes, this.cageMeshes, this.roomMeshes]) {
+      for (const mesh of map.values()) {
+        mesh.parent?.remove(mesh);
+        disposeTree(mesh);
+      }
+      map.clear();
+    }
+    this.sync();
   }
 
   sync() {
@@ -139,6 +155,16 @@ export class WorldRenderer {
       if (!mesh) continue;
       const floor = mesh.children[0];
       if (!floor?.material) continue;
+      // Oda tabelası: tür atanmışsa tür adı, değilse oda adı (Bölüm 3, s. 51)
+      const sign = mesh.userData.sign;
+      if (sign) {
+        const label = room.species ? getSpecies(room.species).name : room.def.name;
+        const suffix = room.quarantined ? ' · KARANTİNA'
+          : !room.operational ? ' · KAPALI'
+          : room.diseaseLevel > 20 ? ' · ŞÜPHE' : '';
+        this.factory.updateSign(sign, label + suffix);
+      }
+
       if (room.diseaseLevel > 20) floor.material.color.setHex(0xe3c3bd);
       else if (room.quarantined) floor.material.color.setHex(0xe8d9b8);
       else if (!room.operational) floor.material.color.setHex(0xc8c8c8);
@@ -146,10 +172,30 @@ export class WorldRenderer {
     }
   }
 
-  /** Küçük hareket animasyonu */
+  /** Küçük hareket animasyonu + harici GLB animasyon kliplerinin güncellenmesi */
   animate(dt) {
     this.time += dt;
+
+    // Harici modellerden gelen animasyon klipleri (varsa)
+    for (const map of [this.animalMeshes, this.cageMeshes, this.roomMeshes]) {
+      for (const mesh of map.values()) {
+        mesh.userData.mixer?.update(dt);
+      }
+    }
+
+    // Oda tabelaları kameraya dönük dursun (hangi açıdan bakılırsa okunabilsin)
+    const cam = this.sceneMgr.camera;
+    for (const mesh of this.roomMeshes.values()) {
+      const sign = mesh.userData.sign;
+      if (!sign) continue;
+      const dx = cam.position.x - (mesh.position.x + sign.position.x);
+      const dz = cam.position.z - (mesh.position.z + sign.position.z);
+      sign.rotation.y = Math.atan2(dx, dz);
+    }
+
     for (const mesh of this.animalMeshes.values()) {
+      // Kendi modeli animasyonluysa el yapımı salınım uygulanmaz
+      if (mesh.userData.mixer) continue;
       const w = mesh.userData.wander;
       if (!w) continue;
       const t = this.time * 1.2 + w.phase;
@@ -214,6 +260,11 @@ function perCageIndex(map, cageId, state) {
 }
 
 function disposeTree(obj) {
+  if (obj.userData?.mixer) {
+    obj.userData.mixer.stopAllAction();
+    obj.userData.mixer.uncacheRoot(obj);
+    obj.userData.mixer = null;
+  }
   obj.traverse?.((child) => {
     child.geometry?.dispose?.();
     if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose?.());

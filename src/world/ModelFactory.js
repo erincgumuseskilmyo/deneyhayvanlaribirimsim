@@ -4,10 +4,24 @@ import { getSpecies } from '../data/species.js';
 
 /**
  * LOW-POLY MODEL ÜRETİMİ
- * Modeller prosedürel olarak üretilir (harici GLB dosyası gerekmez).
- * Dış GLB kullanmak isteyen için `loadGLTF` kancası bırakılmıştır:
- * public/models/<name>.glb konur ve ModelFactory.override(name, url) çağrılır.
+ *
+ * Varsayılan olarak tüm modeller prosedürel üretilir — harici dosya gerekmez.
+ * İsteğe bağlı olarak Blender'dan çıkarılmış GLB modelleri devreye girebilir:
+ *
+ *   public/models/manifest.json  ->  hangi modelin hangi dosyadan geleceği
+ *   public/models/*.glb          ->  modellerin kendisi
+ *
+ * Manifest yoksa ya da bir dosya yüklenemezse oyun sessizce prosedürel modele
+ * geri döner; hiçbir şey kırılmaz. Model adları ve ölçü kuralları için
+ * docs/MODELLER.md dosyasına bakın.
  */
+
+/** Manifestte tanımlanabilecek model adları */
+export const MODEL_SLOTS = {
+  room: (typeId) => `room_${typeId}`,
+  cage: (typeId) => `cage_${typeId}`,
+  animal: (speciesId) => `animal_${speciesId}`
+};
 
 const WALL_H = 1.5;
 
@@ -24,18 +38,134 @@ export class ModelFactory {
     };
   }
 
-  /** Harici GLB modeli kaydet (opsiyonel) */
-  async loadGLTF(name, url) {
+  /**
+   * Tek bir GLB modelini kaydeder.
+   * @param {string} name  MODEL_SLOTS ile üretilen model adı (ör. 'animal_mouse')
+   * @param {string} url   dosya yolu
+   * @param {object} opts  { fitTo?: number, idle?: string }
+   *   fitTo: modelin en uzun kenarı bu değere (oyun birimi = metre) ölçeklenir.
+   *          Blender'daki ölçek hatalarına karşı koruma sağlar.
+   *   idle:  sürekli oynatılacak animasyon klibinin adı (yoksa ilk klip).
+   */
+  async loadGLTF(name, url, opts = {}) {
     const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync(url);
-    this.overrides.set(name, gltf.scene);
-    return gltf.scene;
+    const scene = gltf.scene;
+
+    // Gölge ayarları — Blender'dan gelen modeller bunu taşımaz
+    scene.traverse((o) => {
+      if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
+    });
+
+    if (opts.fitTo) this._fitTo(scene, opts.fitTo);
+
+    this.overrides.set(name, {
+      scene,
+      animations: gltf.animations ?? [],
+      idle: opts.idle ?? null
+    });
+    return scene;
   }
 
+  /** Modeli, en uzun kenarı `target` olacak biçimde ölçekler ve tabanını y=0'a oturtur. */
+  _fitTo(object, target) {
+    const box = new THREE.Box3().setFromObject(object);
+    const size = box.getSize(new THREE.Vector3());
+    const longest = Math.max(size.x, size.y, size.z);
+    if (longest > 0 && Number.isFinite(longest)) {
+      const k = target / longest;
+      object.scale.multiplyScalar(k);
+    }
+    const box2 = new THREE.Box3().setFromObject(object);
+    object.position.y -= box2.min.y;
+  }
+
+  /**
+   * Manifesti okuyup içindeki tüm modelleri yükler.
+   * Manifest ya da dosyalar yoksa hata fırlatmaz — prosedürel modeller kullanılır.
+   * @returns {{loaded: string[], missing: string[], manifest: boolean}}
+   */
+  async loadManifest(baseUrl = import.meta.env?.BASE_URL ?? '/') {
+    const url = `${baseUrl}models/manifest.json`.replace(/([^:]\/)\/+/g, '$1');
+    const result = { loaded: [], missing: [], manifest: false };
+
+    let manifest;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return result;              // manifest yok: prosedürel devam
+      manifest = await res.json();
+    } catch {
+      return result;                            // ağ/JSON hatası: prosedürel devam
+    }
+    result.manifest = true;
+
+    const entries = Object.entries(manifest.models ?? {});
+    await Promise.all(entries.map(async ([name, def]) => {
+      const file = typeof def === 'string' ? def : def.file;
+      if (!file) { result.missing.push(name); return; }
+      const fileUrl = `${baseUrl}models/${file}`.replace(/([^:]\/)\/+/g, '$1');
+      try {
+        await this.loadGLTF(name, fileUrl, {
+          fitTo: typeof def === 'object' ? def.fitTo : undefined,
+          idle: typeof def === 'object' ? def.idle : undefined
+        });
+        result.loaded.push(name);
+      } catch (err) {
+        console.warn(`[ModelFactory] "${name}" yüklenemedi (${file}) — prosedürel model kullanılacak.`, err.message);
+        result.missing.push(name);
+      }
+    }));
+
+    return result;
+  }
+
+  /** Bu ad için harici model var mı? */
+  has(name) { return this.overrides.has(name); }
+
+  /**
+   * Kayıtlı modelden bir kopya üretir. Animasyon varsa kopyaya özel bir
+   * AnimationMixer kurulur ve `userData.mixer` üzerinden dışarı verilir;
+   * WorldRenderer her karede bunu günceller.
+   */
   _override(name) {
-    const o = this.overrides.get(name);
-    return o ? o.clone(true) : null;
+    const entry = this.overrides.get(name);
+    if (!entry) return null;
+
+    const obj = this._cloneScene(entry.scene);
+
+    if (entry.animations.length) {
+      const mixer = new THREE.AnimationMixer(obj);
+      const clip = entry.idle
+        ? THREE.AnimationClip.findByName(entry.animations, entry.idle) ?? entry.animations[0]
+        : entry.animations[0];
+      if (clip) {
+        const action = mixer.clipAction(clip);
+        action.play();
+        // Aynı modelden çok sayıda kopya senkron oynamasın
+        action.time = Math.random() * clip.duration;
+      }
+      obj.userData.mixer = mixer;
+    }
+    return obj;
+  }
+
+  /** İskeletli (skinned) modeller düz clone ile bozulur; SkeletonUtils gerekir. */
+  _cloneScene(scene) {
+    let skinned = false;
+    scene.traverse((o) => { if (o.isSkinnedMesh) skinned = true; });
+    if (!skinned) return scene.clone(true);
+    if (!this._skeletonClone) {
+      console.warn('[ModelFactory] SkeletonUtils yüklenmedi; iskeletli model düz kopyalanıyor.');
+      return scene.clone(true);
+    }
+    return this._skeletonClone(scene);
+  }
+
+  /** İskeletli model desteği için SkeletonUtils'i hazırlar (opsiyonel). */
+  async enableSkinnedModels() {
+    const { clone } = await import('three/examples/jsm/utils/SkeletonUtils.js');
+    this._skeletonClone = clone;
   }
 
   // ---------- ODA ----------
@@ -76,7 +206,7 @@ export class ModelFactory {
       group.add(mesh);
     }
 
-    // Kapı boşluğu göstergesi (renkli eşik)
+    // Kapı eşiği
     const door = new THREE.Mesh(
       new THREE.BoxGeometry(0.9, 0.06, 0.28),
       new THREE.MeshLambertMaterial({ color: 0x7f95ab })
@@ -84,14 +214,34 @@ export class ModelFactory {
     door.position.set(0, 0.14, room.d / 2 - 0.14);
     group.add(door);
 
-    // Oda tipini belirten renkli işaret kübü (çatı köşesi)
-    const marker = new THREE.Mesh(
-      new THREE.BoxGeometry(0.4, 0.4, 0.4),
-      new THREE.MeshLambertMaterial({ color: def.color })
+    // Kapı üzerindeki açılır kapanır gözlem penceresi
+    // "Oda kapıları üzerinde içerisini gözlem yapmayı kolaylaştırmak amacı ile
+    //  açılıp kapanabilen küçük pencereler bulunmalıdır." (Bölüm 3, s. 51)
+    const window_ = new THREE.Mesh(
+      new THREE.BoxGeometry(0.42, 0.3, 0.04),
+      new THREE.MeshLambertMaterial({
+        color: 0xa8c4d8, transparent: true, opacity: 0.75
+      })
     );
-    marker.position.set(-room.w / 2 + 0.35, WALL_H + 0.3, -room.d / 2 + 0.35);
-    marker.castShadow = true;
-    group.add(marker);
+    window_.position.set(0, WALL_H * 0.72, room.d / 2 - 0.06);
+    window_.userData.isWindow = true;
+    group.add(window_);
+
+    const windowFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 0.38, 0.03),
+      new THREE.MeshLambertMaterial({ color: 0x8fa3b5 })
+    );
+    windowFrame.position.set(0, WALL_H * 0.72, room.d / 2 - 0.08);
+    group.add(windowFrame);
+
+    // Oda üstündeki tür/oda tabelası
+    // "Farklı odalarda yetiştirilen hayvanların her birinin odasının üzerine
+    //  o odada barındırılan tür ile ilgili tabela asılması gerekir." (Bölüm 3, s. 51)
+    const sign = this.buildSign(def.name, def.color);
+    sign.position.set(0, WALL_H + 0.32, room.d / 2 + 0.02);
+    sign.userData.isSign = true;
+    group.add(sign);
+    group.userData.sign = sign;
 
     group.position.set(room.x + room.w / 2, 0, room.z + room.d / 2);
     return group;
@@ -154,6 +304,67 @@ export class ModelFactory {
     return group;
   }
 
+  /**
+   * Yazılı tabela (canvas dokusu). Oda üstüne asılır ve odada barındırılan
+   * türü gösterir (Bölüm 3, s. 51).
+   */
+  buildSign(text, accent = 0x4a7fb5) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#f7f9fb';
+    ctx.fillRect(0, 0, 512, 128);
+    ctx.fillStyle = `#${new THREE.Color(accent).getHexString()}`;
+    ctx.fillRect(0, 0, 512, 14);
+
+    ctx.fillStyle = '#23303f';
+    ctx.font = 'bold 54px "Segoe UI", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Uzun adlar tabelaya sığsın
+    let label = text;
+    while (ctx.measureText(label).width > 470 && label.length > 4) {
+      label = label.slice(0, -2);
+    }
+    if (label !== text) label += '…';
+    ctx.fillText(label, 256, 74);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.anisotropy = 4;
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.25, 0.31),
+      new THREE.MeshBasicMaterial({ map: texture, transparent: true })
+    );
+    mesh.userData.canvas = canvas;
+    mesh.userData.accent = accent;
+    return mesh;
+  }
+
+  /** Var olan bir tabelanın yazısını değiştirir (oda türü atandığında). */
+  updateSign(sign, text) {
+    if (!sign?.userData?.canvas) return;
+    if (sign.userData.text === text) return;
+    sign.userData.text = text;
+    const canvas = sign.userData.canvas;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f7f9fb';
+    ctx.fillRect(0, 0, 512, 128);
+    ctx.fillStyle = `#${new THREE.Color(sign.userData.accent).getHexString()}`;
+    ctx.fillRect(0, 0, 512, 14);
+    ctx.fillStyle = '#23303f';
+    ctx.font = 'bold 54px "Segoe UI", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    let label = text;
+    while (ctx.measureText(label).width > 470 && label.length > 4) {
+      label = label.slice(0, -2);
+    }
+    if (label !== text) label += '…';
+    ctx.fillText(label, 256, 74);
+    sign.material.map.needsUpdate = true;
+  }
+
   /** Kafes rafı (görsel dolgu) */
   buildRack(width, depth) {
     const g = new THREE.Group();
@@ -185,13 +396,13 @@ export class ModelFactory {
     // Gövde — düşük poligonlu kapsül benzeri
     const body = new THREE.Mesh(new THREE.SphereGeometry(s * 0.5, 7, 5), mat);
     body.scale.set(1.5, 0.85, 0.9);
-    body.position.y = s * 0.45;
+    body.position.y = s * 0.5;
     body.castShadow = true;
     group.add(body);
 
     // Baş
     const head = new THREE.Mesh(new THREE.SphereGeometry(s * 0.3, 6, 5), mat);
-    head.position.set(s * 0.65, s * 0.5, 0);
+    head.position.set(s * 0.65, s * 0.55, 0);
     head.castShadow = true;
     group.add(head);
 
@@ -202,10 +413,30 @@ export class ModelFactory {
     });
     for (const side of [-1, 1]) {
       const ear = new THREE.Mesh(earGeo, earMat);
-      ear.position.set(s * 0.6, s * 0.72, side * s * 0.2);
+      ear.position.set(s * 0.6, s * 0.78, side * s * 0.2);
       ear.rotation.y = Math.PI / 2;
       group.add(ear);
     }
+
+    // Bacaklar — siluetin okunabilirliğini artırır
+    const legGeo = new THREE.CylinderGeometry(s * 0.07, s * 0.06, s * 0.3, 4);
+    const legMat = new THREE.MeshLambertMaterial({
+      color: color.clone().offsetHSL(0, 0, -0.12), flatShading: true
+    });
+    for (const [lx, lz] of [[0.35, 0.28], [0.35, -0.28], [-0.35, 0.28], [-0.35, -0.28]]) {
+      const leg = new THREE.Mesh(legGeo, legMat);
+      leg.position.set(s * lx, s * 0.15, s * lz);
+      leg.castShadow = true;
+      group.add(leg);
+    }
+
+    // Burun ucu
+    const snout = new THREE.Mesh(
+      new THREE.SphereGeometry(s * 0.09, 5, 4),
+      new THREE.MeshLambertMaterial({ color: 0xd8a8a4 })
+    );
+    snout.position.set(s * 0.88, s * 0.46, 0);
+    group.add(snout);
 
     // Kuyruk (tavşan hariç uzun)
     const tailLen = animal.species === 'rabbit' ? s * 0.2 : s * 1.1;
@@ -214,7 +445,7 @@ export class ModelFactory {
       new THREE.MeshLambertMaterial({ color: 0xd8b8b0 })
     );
     tail.rotation.z = Math.PI / 2.2;
-    tail.position.set(-s * 0.75, s * 0.4, 0);
+    tail.position.set(-s * 0.75, s * 0.45, 0);
     group.add(tail);
 
     return group;

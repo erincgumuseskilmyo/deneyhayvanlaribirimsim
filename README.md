@@ -31,7 +31,7 @@ npm install
 npm run dev      # http://localhost:5173
 npm run build    # dist/ üretir
 npm run preview
-npm test         # 29 test: 15 simülasyon + 14 kaynak kitap uyumu (tarayıcı gerekmez)
+npm test         # 30 test: 15 simülasyon + 15 kaynak kitap/varlık uyumu (tarayıcı gerekmez)
 ```
 
 ## Kontroller
@@ -48,7 +48,9 @@ npm test         # 29 test: 15 simülasyon + 14 kaynak kitap uyumu (tarayıcı g
 | `1` `2` `3` | Hız 1× / 2× / 4× |
 
 Kamera dikey açısı sınırlıdır ve yatay bakışa yaklaştıkça duvarlar
-şeffaflaşır, böylece oda içleri her zaman görünür kalır.
+şeffaflaşır, böylece oda içleri her zaman görünür kalır. Her odanın üstünde,
+barındırılan türü gösteren ve kameraya dönük duran bir tabela vardır
+(Bölüm 3, s. 51); kapılarda gözlem penceresi bulunur.
 
 ## Oynanış akışı
 
@@ -125,18 +127,34 @@ olayları dinler.
 - **Eğitim:** kararların ardından "Bu neden önemlidir?" bilgi kartları,
   3 bölüm quizi (5-6 soru), yanlış konular için tekrar önerisi.
 
-## Modeller
+## Modeller ve varlık boru hattı
 
-Low-poly modeller `ModelFactory` içinde **prosedürel olarak** üretilir; harici
-GLB dosyası gerekmez. Kendi modellerinizi kullanmak isterseniz dosyayı
-`public/models/` altına koyup şu kancayı çağırın:
+Low-poly modeller `ModelFactory` içinde **prosedürel olarak** üretilir; oyun
+harici dosya olmadan eksiksiz çalışır. Blender'dan çıkarılmış GLB modelleri
+isteğe bağlı olarak devreye girer:
 
-```js
-await world.factory.loadGLTF('animal_mouse', '/models/mouse.glb');
-world.factory.loadGLTF('room_animal', '/models/animal-room.glb');
+```
+public/models/
+  manifest.json     ← hangi modelin hangi dosyadan geleceği
+  animal_mouse.glb
+  cage_ivc.glb
 ```
 
-Kayıtlı isimler: `room_<odaTipi>`, `cage_<kafesTipi>`, `animal_<tür>`.
+`manifest.example.json` dosyasını `manifest.json` olarak kopyalayıp yalnızca
+ürettiğiniz modelleri bırakın. Boru hattı şunları yapar:
+
+- Açılışta manifesti okuyup modelleri yükler; **manifest yoksa** sessizce
+  prosedürel modellerle devam eder.
+- Bir dosya eksik veya bozuksa **yalnızca o model** prosedürele düşer, oyun
+  çalışmaya devam eder ve uyarı gösterir.
+- `fitTo` ile modeli hedef boyuta ölçekler ve tabanını zemine oturtur —
+  Blender'daki ölçek hatalarına karşı koruma.
+- GLB'de animasyon klibi varsa `AnimationMixer` ile oynatır; aynı türden
+  kopyalar senkron oynamasın diye başlangıç zamanını rastgeleleştirir.
+- İskeletli (skinned) modeller `SkeletonUtils` ile doğru kopyalanır.
+
+Model adları, ölçek/yön/pivot kuralları, poligon bütçesi ve Blender export
+ayarları: [`docs/MODELLER.md`](docs/MODELLER.md)
 
 ## İçerik sınırları
 

@@ -221,3 +221,34 @@ test('Her quiz sorusunun geçerli bir kaynak referansı ve konusu vardır', () =
   }
   assert.equal(n, 30);
 });
+
+// ---------------------------------------------------------------------------
+// VARLIK BORU HATTI
+// ---------------------------------------------------------------------------
+
+test('Model manifest örneği koddaki tür ve kafes adlarıyla uyumlu', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { CAGE_TYPES } = await import('../src/data/cages.js');
+  const manifest = JSON.parse(readFileSync('public/models/manifest.example.json', 'utf8'));
+
+  const expected = [
+    ...Object.keys(SPECIES).map((id) => `animal_${id}`),
+    ...Object.keys(CAGE_TYPES).map((id) => `cage_${id}`)
+  ];
+  const actual = Object.keys(manifest.models);
+
+  assert.deepEqual(actual.sort(), expected.sort(),
+    'manifest.example.json içindeki model adları data/ dosyalarıyla eşleşmeli');
+
+  // Her girdinin dosyası ve ölçek hedefi olmalı
+  for (const [name, def] of Object.entries(manifest.models)) {
+    assert.ok(def.file?.endsWith('.glb'), `${name}: .glb dosyası belirtilmeli`);
+    assert.ok(typeof def.fitTo === 'number' && def.fitTo > 0, `${name}: fitTo pozitif olmalı`);
+  }
+
+  // Hayvan modellerinin fitTo değeri, türün oyun ölçeğiyle tutarlı olmalı
+  for (const [id, sp] of Object.entries(SPECIES)) {
+    assert.equal(manifest.models[`animal_${id}`].fitTo, sp.scale,
+      `animal_${id}: fitTo, species.scale ile aynı olmalı`);
+  }
+});

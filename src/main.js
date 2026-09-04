@@ -28,6 +28,25 @@ const tabBar = new TabBar(state, systems, bus, modal);
 game.bootstrap();
 world.sync();
 
+// --- Opsiyonel harici modeller (public/models/manifest.json) ---
+// Manifest yoksa oyun prosedürel modellerle çalışmaya devam eder.
+world.factory.enableSkinnedModels().catch(() => {});
+world.factory.loadManifest().then((res) => {
+  if (!res.manifest) return;
+  if (res.loaded.length) {
+    world.reloadModels();
+    bus.emit('notify', {
+      text: `${res.loaded.length} harici model yüklendi.`, level: 'good'
+    });
+  }
+  if (res.missing.length) {
+    bus.emit('notify', {
+      text: `${res.missing.length} model yüklenemedi; prosedürel model kullanılıyor.`,
+      level: 'warn'
+    });
+  }
+}).catch(() => {});
+
 // --- Girdi: fare ile yerleştirme ve seçim ---
 let buildMode = { mode: 'select', type: null };
 bus.on('build:modeChanged', (m) => {
