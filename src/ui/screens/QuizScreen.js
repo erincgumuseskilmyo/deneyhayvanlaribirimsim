@@ -1,6 +1,6 @@
 import { el, kv } from '../dom.js';
 import { QUIZ_LIST } from '../../data/quizzes.js';
-import { getKnowledge, SOURCE_LABELS } from '../../data/knowledge.js';
+import { getKnowledge, SOURCE_LABELS, BOOK } from '../../data/knowledge.js';
 
 /**
  * Bölüm sonu quiz: 5-10 soru, başarı puanı, yanlış konular ve tekrar önerisi.
@@ -60,7 +60,10 @@ function runQuiz(quiz, state, bus, modal) {
           const correct = i === q.answer;
           btn.classList.add(correct ? 'correct' : 'wrong');
           if (!correct) optionButtons[q.answer].classList.add('correct');
-          answers.push({ topic: q.topic, correct, question: q.q });
+          answers.push({ topic: q.topic, correct, question: q.q, ref: q.ref });
+          if (!correct && q.ref) {
+            body.append(el('p', { class: 'hint', text: `Kaynak: ${q.ref}` }));
+          }
           setTimeout(() => {
             index += 1;
             modal.close();
@@ -95,7 +98,9 @@ function runQuiz(quiz, state, bus, modal) {
         body.append(el('div', { class: 'knowledge' }, [
           el('strong', { text: k.title }),
           el('p', { text: k.text }),
-          el('span', { class: 'src', text: `Kaynak: ${SOURCE_LABELS[k.source]}` })
+          el('span', { class: 'src', text: k.ref
+            ? `Kaynak: ${BOOK.title} — ${k.ref}`
+            : SOURCE_LABELS[k.source] })
         ]));
       }
     } else {

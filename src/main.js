@@ -115,6 +115,9 @@ const ROOM_TEACH = {
 function maybeTeach(roomType) {
   const k = ROOM_TEACH[roomType];
   if (!k || taught.has(k)) return;
+  // Arka arkaya oda kurulduğunda bilgi kartları üst üste yığılmasın:
+  // modal meşgulse kartı işaretlemeden geç, bir sonraki fırsatta gösterilsin.
+  if (modal.open || modal.queue.length) return;
   taught.add(k);
   modal.show({ title: 'Bilgi Kartı', body: '', knowledge: k });
 }

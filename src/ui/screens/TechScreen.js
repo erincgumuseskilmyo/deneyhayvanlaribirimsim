@@ -12,11 +12,13 @@ export function techScreen(state, systems, bus, modal) {
     const unlocked = st.unlockedSpecies.has(sp.id);
     wrap.append(el('div', { class: 'list-item' }, [
       el('h4', { text: `${sp.name} (${sp.latin})` }),
-      el('p', { class: 'hint', text: sp.facts[0] }),
+      el('p', { class: 'hint', text: sp.facts[0].text }),
+      el('p', { class: 'hint', style: 'font-style:italic', text: `Kaynak: ${sp.facts[0].ref}` }),
       el('div', {}, [
         el('span', { class: 'tag', text: `Optimum ${sp.tempOptimum[0]}-${sp.tempOptimum[1]} °C` }),
         el('span', { class: 'tag', text: `Nem %${sp.humidityOptimum[0]}-${sp.humidityOptimum[1]}` }),
-        el('span', { class: 'tag', text: `Kafes başına ≤ ${sp.perCageCapacity}` })
+        el('span', { class: 'tag', text: `Hayvan başına ≥ ${sp.housing.areaPerAnimal[0].area} cm²` }),
+        el('span', { class: 'tag', text: `Gebelik ${sp.gestationText}` })
       ]),
       unlocked
         ? el('span', { class: 'tag good', text: 'Açık' })

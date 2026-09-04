@@ -43,8 +43,19 @@ export class Animal {
   }
 
   _baseWeight(sp) {
-    // Oyun soyutlaması: doğumda türün ölçeğine bağlı sembolik ağırlık (gram)
-    return { mouse: 1.5, rat: 5, guinea_pig: 90, gerbil: 3, hamster: 2.5, rabbit: 60 }[sp.id] ?? 2;
+    // Doğum ağırlığı — oyun değeri (kaynak kitap doğum ağırlığı vermez)
+    return sp.birthWeight ?? 2;
+  }
+
+  /**
+   * Yaşına göre olması beklenen ağırlık (gram).
+   * "Zamana göre büyüme ve gelişim grafiği vardır" — Bölüm 4, s. 73.
+   * Refah belirteçlerinde bu grafiğin altına inilip inilmediği ölçülür.
+   */
+  expectedWeight() {
+    const sp = this.speciesData;
+    const t = clamp(this.age / sp.maturityDays, 0, 1);
+    return sp.birthWeight + (sp.adultWeight - sp.birthWeight) * t;
   }
 
   get speciesData() { return getSpecies(this.species); }
@@ -53,15 +64,10 @@ export class Animal {
 
   get ageRatio() { return this.age / this.speciesData.lifespanDays; }
 
-  /** Yaşa göre büyüme (asimptotik) — oyun soyutlaması */
+  /** Yaşa göre büyüme; refah düşükse beklenen grafiğin altında kalır */
   updateWeight() {
-    const sp = this.speciesData;
-    const adult = { mouse: 28, rat: 320, guinea_pig: 850, gerbil: 75, hamster: 120, rabbit: 3200 }[sp.id] ?? 30;
-    const t = clamp(this.age / sp.maturityDays, 0, 1);
-    const target = this._baseWeight(sp) + (adult - this._baseWeight(sp)) * t;
-    // Refah düşükse hedef ağırlığın altında kalır
     const welfareFactor = 0.8 + 0.2 * (this.welfare / 100);
-    this.weight = Math.round(target * welfareFactor * 10) / 10;
+    this.weight = Math.round(this.expectedWeight() * welfareFactor * 10) / 10;
   }
 
   ageOneDay() {
@@ -85,8 +91,7 @@ export class Animal {
   marketValue() {
     const sp = this.speciesData;
     let value = sp.salePrice;
-    if (this.microbiologicalStatus === 'spf') value *= 1.6;
-    if (this.microbiologicalStatus === 'germ_free') value *= 2.4;
+    if (this.microbiologicalStatus === 'barrier') value *= 1.6;
     if (this.genetics === 'transgenic') value *= 2.0;
     if (this.genetics === 'knockout') value *= 2.8;
     if (this.genetics === 'knockin') value *= 3.4;

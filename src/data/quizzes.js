@@ -1,174 +1,234 @@
 /**
  * BÖLÜM SONU QUIZ SORULARI
- * Sorular bilgi kartlarıyla aynı kaynak ayrımına tabidir:
- * 'general' etiketli sorular genel ilkeleri sınar, kaynak kitapla doğrulanmalıdır.
+ *
+ * Tüm sorular kaynak kitaptan üretilmiştir; her sorunun `ref` alanı
+ * doğrulanabileceği bölüm ve sayfayı verir. `topic` alanı, yanlış yanıt
+ * durumunda tekrar önerilecek bilgi kartını gösterir.
  */
 export const QUIZZES = {
   chapter1: {
     id: 'chapter1',
-    title: 'Bölüm 1 — Temel Kavramlar ve Etik',
+    title: 'Bölüm 1 — Etik, 3R ve Etik Kurullar',
     unlockAtDay: 30,
     questions: [
       {
-        q: '3R ilkesinde "Reduction" neyi ifade eder?',
-        options: [
-          'Hayvan yerine alternatif yöntem kullanmayı',
-          'Bilimsel amaca ulaşmak için gereken en az hayvan sayısını kullanmayı',
-          'İşlemlerin acısını azaltmayı',
-          'Deney süresini kısaltmayı'
-        ],
-        answer: 1, topic: 'three_r'
+        q: '3R kuralında "Refinement" ilkesinin kitapta verilen Türkçe karşılığı nedir?',
+        options: ['Yerine başkasını kullanma', 'Sayısını azaltma', 'Şiddetini azaltma', 'Sorumluluk alma'],
+        answer: 2, topic: 'three_r', ref: 'Bölüm 2, s. 22'
       },
       {
-        q: 'Bir kurumda hayvan deneyi başvurularını değerlendiren yerel etik kurul hangisidir?',
-        options: ['HADMEK', 'HADYEK', 'Biyogüvenlik Kurulu', 'Etik Denetim Ofisi'],
-        answer: 1, topic: 'ethics_committee'
+        q: '3R kuralı ilk olarak kim tarafından ve hangi yıl ortaya konmuştur?',
+        options: [
+          'Russel ve Burch, 1959', 'Pasteur ve Koch, 1885',
+          'Bernard ve Magendie, 1865', 'Watson ve Crick, 1953'
+        ],
+        answer: 0, topic: 'three_r', ref: 'Bölüm 2, s. 22'
       },
       {
-        q: 'Aşağıdakilerden hangisi "Refinement" kapsamına girer?',
+        q: 'Ülkemizde 3R ilkelerinin Türkçede karşılık bulan şekli olan 4A kuralında aşağıdakilerden hangisi YOKTUR?',
         options: [
-          'Hücre kültürü ile hayvanı tamamen ikame etmek',
-          'Grup başına hayvan sayısını istatistiksel olarak azaltmak',
-          'Uygun analjezi ve iyi barındırma ile acıyı en aza indirmek',
-          'Projeyi reddetmek'
+          'Az sayıda deney hayvanı kullanımı',
+          'Ağrısız-acısız deney protokolü',
+          'Alternatif araştırma olanaklarını araştırmak',
+          'Araştırmanın maliyetini düşürmek'
         ],
-        answer: 2, topic: 'three_r'
+        answer: 3, topic: 'four_a', ref: 'Bölüm 2, s. 23'
       },
       {
-        q: 'Düşük hayvan refahının bilimsel sonuçlara etkisi nedir?',
-        options: [
-          'Etkisi yoktur, sadece etik bir konudur',
-          'Verilerin güvenilirliğini ve tekrarlanabilirliğini düşürür',
-          'Sonuçları daha güçlü hale getirir',
-          'Sadece maliyeti artırır'
-        ],
-        answer: 1, topic: 'welfare_five'
+        q: 'HADYEK en az kaç, en fazla kaç üyeden oluşur?',
+        options: ['En az 3, en fazla 11', 'En az 5, en fazla 21', 'En az 7, en fazla 15', 'En az 9, en fazla 25'],
+        answer: 1, topic: 'ethics_committee', ref: 'Bölüm 2, s. 29'
       },
       {
-        q: 'Deney hayvanları kullanım sertifika programı tipik olarak neyi içerir?',
+        q: 'HADYEK değerlendirme sonucunda aşağıdaki kararlardan hangisini VEREMEZ?',
+        options: ['Uygun', 'Düzeltilmesi gerekir', 'Şartlı olarak uygun', 'Süresiz olarak ertelenmiştir'],
+        answer: 3, topic: 'hadyek_decisions', ref: 'Bölüm 2, s. 30'
+      },
+      {
+        q: 'HADYEK kararları başvuru sahibine kaç iş günü içinde bildirilir?',
+        options: ['On iş günü', 'Yirmi iş günü', 'Kırk iş günü', 'Altmış iş günü'],
+        answer: 2, topic: 'hadyek_decisions', ref: 'Bölüm 2, s. 30'
+      },
+      {
+        q: 'Bir ilde hayvan deneylerinin yapılabilmesi için HADYEK’in yanında hangisinin bulunması zorunludur?',
+        options: ['Hayvan refahı birimi', 'Genetik laboratuvarı', 'IVC odası', 'Metabolizma birimi'],
+        answer: 0, topic: 'hadyek_requirements', ref: 'Bölüm 2, s. 28'
+      },
+      {
+        q: 'Deney hayvanları kullanım sertifika programı toplam kaç saattir ve nasıl dağılır?',
         options: [
-          'Yalnızca teorik dersleri',
-          'Yalnızca uygulamalı çalışmaları',
-          'Teorik ve uygulamalı bölümlerin ikisini birden',
-          'Sadece mevzuat sınavını'
+          '40 saat: 20 teori + 20 uygulama',
+          '80 saat: 40 teori + 40 uygulama',
+          '60 saat: 30 teori + 30 uygulama',
+          '120 saat: 60 teori + 60 uygulama'
         ],
-        answer: 2, topic: 'certificate'
+        answer: 1, topic: 'certificate', ref: 'Bölüm 2, s. 32'
+      },
+      {
+        q: 'Sertifika programında adayların eğitimin yüzde kaçına devam zorunluluğu vardır?',
+        options: ['%60', '%70', '%80', '%100'],
+        answer: 2, topic: 'certificate', ref: 'Bölüm 2, s. 32'
+      },
+      {
+        q: 'Etik kurul başvurusunda çalışma ekibiyle ilgili zorunlu şart nedir?',
+        options: [
+          'Ekipteki herkesin doktora derecesine sahip olması',
+          'Ekipte en az bir kişinin deney hayvanları kullanım sertifikasına sahip olması',
+          'Ekibin en az beş kişiden oluşması',
+          'Ekipte bir hukukçu bulunması'
+        ],
+        answer: 1, topic: 'application_form', ref: 'Bölüm 2, s. 33'
       }
     ]
   },
 
   chapter2: {
     id: 'chapter2',
-    title: 'Bölüm 2 — Barındırma, Hijyen ve Biyogüvenlik',
+    title: 'Bölüm 2 — Fiziki Şartlar, Kafesler ve Hijyen',
     unlockAtDay: 90,
     questions: [
       {
-        q: 'Temiz/kirli alan ayrımı ve tek yönlü akış hangi başlığın parçasıdır?',
-        options: ['Zenginleştirme', 'Biyogüvenlik', 'Genotiplendirme', 'Ekonomi'],
-        answer: 1, topic: 'biosecurity'
+        q: 'Deney hayvanı odalarında ortam sıcaklığının hangi aralıkta tutulması istenir?',
+        options: ['15-18 °C', '18-20 °C', '20-24 °C', '24-28 °C'],
+        answer: 2, topic: 'environment', ref: 'Bölüm 3, s. 48'
       },
       {
-        q: 'Tesise yeni gelen hayvanlar için ilk uygulama hangisi olmalıdır?',
+        q: 'Ortam neminin ortalama olarak hangi aralıkta olması yeterli kabul edilir?',
+        options: ['%20-35', '%35-45', '%45-65', '%65-85'],
+        answer: 2, topic: 'environment', ref: 'Bölüm 3, s. 48'
+      },
+      {
+        q: 'Sıçan yetiştirme odalarında ortam neminin düşük olması yavrularda neye yol açar?',
+        options: ['Kannibalizm', 'Ring-tail', 'Koprofaji', 'Obezite'],
+        answer: 1, topic: 'environment', ref: 'Bölüm 3, s. 48'
+      },
+      {
+        q: 'Deney hayvanı odalarında aydınlatma döngüsü genel olarak nasıl uygulanır?',
         options: [
-          'Doğrudan üretim odasına almak',
-          'Karantinada ayrı tutmak',
-          'Hemen projeye dahil etmek',
-          'Satışa çıkarmak'
+          '8 saat aydınlık / 16 saat karanlık',
+          '12 saat aydınlık / 12 saat karanlık',
+          '16 saat aydınlık / 8 saat karanlık',
+          'Sürekli aydınlık'
         ],
-        answer: 1, topic: 'quarantine'
+        answer: 1, topic: 'environment', ref: 'Bölüm 3, s. 48'
       },
       {
-        q: 'Kirli altlıkta biriken amonyağın en belirgin etkisi hangi sistem üzerinedir?',
-        options: ['Sindirim sistemi', 'Solunum sistemi', 'İskelet sistemi', 'Görme'],
-        answer: 1, topic: 'hygiene'
+        q: 'Fareler için önerilen minimum bölme büyüklüğü ve minimum bölme yüksekliği nedir?',
+        options: ['150 cm² / 10 cm', '330 cm² / 12 cm', '800 cm² / 18 cm', '1200 cm² / 18 cm'],
+        answer: 1, topic: 'cage_size', ref: 'Bölüm 3, Tablo 3.2'
       },
       {
-        q: 'IVC sistemlerinin temel avantajı nedir?',
+        q: 'Galvaniz kaplı kafeslerin artık kullanılmamasının nedeni nedir?',
         options: [
-          'İşletme maliyetini düşürmesi',
-          'Her kafese filtrelenmiş hava vererek kafesler arası bulaşmayı azaltması',
-          'Temizliği kolaylaştırması',
-          'Zenginleştirmeye gerek bırakmaması'
+          'Çok ağır olmaları',
+          'Hayvanların kemirerek çinko almaları ve zarar görmeleri',
+          'Şeffaf olmamaları',
+          'Pahalı olmaları'
         ],
-        answer: 1, topic: 'ivc'
+        answer: 1, topic: 'cages', ref: 'Bölüm 3, s. 55'
       },
       {
-        q: 'Aşırı kafes yoğunluğunun beklenen sonucu nedir?',
+        q: 'Izgara tabanlı sürgülü tepsi kafeslerin dezavantajı nedir?',
         options: [
-          'Üreme başarısında artış',
-          'Stres, saldırganlık ve hastalık yayılımında artış',
-          'Refah puanında artış',
-          'Yem tüketiminde azalma'
+          'Temizliğinin zor olması',
+          'Koprofajiyi artırması',
+          'Özellikle sıçan ve tavşanlarda ayak yaralanmalarına neden olabilmesi',
+          'Koku oluşturması'
         ],
-        answer: 1, topic: 'stocking'
+        answer: 2, topic: 'cages', ref: 'Bölüm 3, s. 57'
       },
       {
-        q: 'Pest kontrolünde en kritik izleme noktalarından biri hangisidir?',
-        options: ['Eğitim sınıfı', 'Yem deposu', 'İdari oda', 'Personel odası'],
-        answer: 1, topic: 'pest'
+        q: 'Standart bir pelet yemde bulunması gereken ham protein oranı nedir?',
+        options: ['%4', '%6', '%14', '%24'],
+        answer: 3, topic: 'feeding', ref: 'Bölüm 3, s. 59'
+      },
+      {
+        q: 'Yem depolarının sıcaklığı en fazla kaç °C olmalıdır?',
+        options: ['15 °C', '18 °C', '21 °C', '25 °C'],
+        answer: 2, topic: 'feeding', ref: 'Bölüm 3, s. 49, 59'
+      },
+      {
+        q: 'Farklı bir durum söz konusu değilse kafesler ne sıklıkla değiştirilmelidir?',
+        options: ['Günde bir kez', 'Haftada bir-iki kez', 'Ayda bir kez', 'Üç ayda bir'],
+        answer: 1, topic: 'hygiene', ref: 'Bölüm 5, s. 109'
       }
     ]
   },
 
   chapter3: {
     id: 'chapter3',
-    title: 'Bölüm 3 — İleri Sistemler ve Yönetim',
+    title: 'Bölüm 3 — Refah, Üretim, Genetik ve Biyogüvenlik',
     unlockAtDay: 180,
     questions: [
       {
-        q: 'SPF koloni ne anlama gelir?',
+        q: 'Kitapta hayvan refahının belirteçleri kaç grupta incelenir?',
         options: [
-          'Hiçbir mikroorganizma taşımayan hayvanlar',
-          'Belirli patojenlerin bulunmadığı, tanımlanmış sağlık statüsündeki koloni',
-          'Genetiği değiştirilmiş koloni',
-          'Karantinadaki koloni'
+          'İki: fiziksel ve zihinsel',
+          'Üç: genel, fizyolojik, davranış',
+          'Dört: genel, fizyolojik, davranış ve özel belirteçler',
+          'Beş: beslenme, barınma, sağlık, davranış, çevre'
         ],
-        answer: 1, topic: 'spf'
+        answer: 2, topic: 'welfare_indicators', ref: 'Bölüm 4, s. 73-74'
       },
       {
-        q: 'Germ-free hayvanlar nasıl barındırılır?',
-        options: ['Standart kafeslerde', 'İzolatörlerde', 'Açık raflarda', 'Karantinada'],
-        answer: 1, topic: 'spf'
+        q: 'Aşağıdakilerden hangisi fizyolojik refah belirteçlerindendir?',
+        options: [
+          'Doğal davranışları sergileyememe',
+          'Nabız, vücut sıcaklığı ve solunum hızındaki artışlar',
+          'Ortalama yaşam süresinin kısalması',
+          'Kontrol kaybı'
+        ],
+        answer: 1, topic: 'welfare_indicators', ref: 'Bölüm 4, s. 73'
       },
       {
-        q: 'Genetiği değiştirilmiş hatlarda refah takibinin ayrıca önemli olmasının nedeni nedir?',
-        options: [
-          'Daha ucuz oldukları için',
-          'Beklenmeyen fenotipler ortaya çıkabildiği için',
-          'Daha hızlı ürediği için',
-          'Kayıt gerektirmedikleri için'
-        ],
-        answer: 1, topic: 'gm_animals'
+        q: 'Farelerde hamilelik süresi ve bir batındaki yavru sayısı nedir?',
+        options: ['16 gün / 6-8 yavru', '19-21 gün / 6-12 yavru', '21-23 gün / 8-16 yavru', '31-32 gün / 7-8 yavru'],
+        answer: 1, topic: 'mouse_breeding', ref: 'Bölüm 5, s. 96'
       },
       {
-        q: 'Soy kütüğü ve kullanım kayıtlarının tutulması öncelikle neyi sağlar?',
-        options: [
-          'Vergi avantajı',
-          'İzlenebilirlik ve bilimsel tekrarlanabilirlik',
-          'Yem tasarrufu',
-          'Personel morali'
-        ],
-        answer: 1, topic: 'records'
+        q: 'Bir kafeste çok sayıda yaşayan dişi farelerde östral siklusun görülmemesine ne ad verilir?',
+        options: ['Bruce Etkisi', 'Whitten Etkisi', 'Lee-Boot Etkisi', 'Ring-tail'],
+        answer: 2, topic: 'mouse_effects', ref: 'Bölüm 5, s. 96'
       },
       {
-        q: 'Hayvan odasında kontrol altında tutulması gereken fiziki parametreler hangileridir?',
-        options: [
-          'Yalnızca sıcaklık',
-          'Sıcaklık, nem, havalandırma, aydınlatma döngüsü ve gürültü',
-          'Yalnızca aydınlatma',
-          'Yalnızca gürültü'
-        ],
-        answer: 1, topic: 'environment'
+        q: 'Sıçanlarda gebelik süresi ve yavru sayısı nedir?',
+        options: ['16 gün / 6-8 yavru', '19-21 gün / 6-12 yavru', '21-23 gün / 8-16 yavru', '59-72 gün / 2-5 yavru'],
+        answer: 2, topic: 'rat_breeding', ref: 'Bölüm 5, s. 105-106'
       },
       {
-        q: 'Bu oyunda oyun sonu derecesi neye göre hesaplanır?',
+        q: 'Hayvanların birbirlerini veya yavrularını yemesine ne ad verilir?',
+        options: ['Koprofaji', 'Kannibalizm', 'Etoloji', 'Premedikasyon'],
+        answer: 1, topic: 'cannibalism', ref: 'Bölüm 5, s. 96'
+      },
+      {
+        q: 'Kitapta "mikro çevre" hangisini tanımlar?',
         options: [
-          'Yalnızca toplam paraya göre',
-          'Ekonomi, refah, etik, biyogüvenlik ve bilimsel itibarın birlikte değerlendirilmesiyle',
-          'Hayvan sayısına göre',
-          'Oda sayısına göre'
+          'Hayvanların barındırıldığı kafes ortamı',
+          'Kafeslerin bulunduğu oda',
+          'Hayvanların yetiştirildiği bina',
+          'Tesisin bulunduğu yerleşke'
         ],
-        answer: 1, topic: 'game_scoring'
+        answer: 0, topic: 'hygiene', ref: 'Bölüm 5, s. 108'
+      },
+      {
+        q: 'Belirli bir geni susturulmuş hayvanlara ne ad verilir?',
+        options: ['Transgenik', 'Knockout', 'Knockin', 'İnbred'],
+        answer: 1, topic: 'gm_animals', ref: 'Bölüm 7, s. 141'
+      },
+      {
+        q: 'BGS-3 laboratuvarında aşağıdakilerden hangisi gereklidir?',
+        options: [
+          'Yalnızca el yıkama lavabosu',
+          'Ortamın negatif basınçlı olması ve iki ayrı kapıdan kontrollü giriş',
+          'Pozitif basınçlı solunum cihazlı elbise',
+          'Hiçbir özel önlem gerekmez'
+        ],
+        answer: 1, topic: 'biosafety_levels', ref: 'Bölüm 8, s. 176'
+      },
+      {
+        q: 'Tıbbi atıkların toplanmasında hangi renkte torbalar kullanılır?',
+        options: ['Mavi', 'Siyah', 'Kırmızı', 'Yeşil'],
+        answer: 2, topic: 'waste', ref: 'Bölüm 8, s. 178'
       }
     ]
   }

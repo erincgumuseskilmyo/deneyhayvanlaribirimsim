@@ -145,9 +145,11 @@ export class DetailPanel {
     this.body.append(kv('Hayvan', animals.length));
     this.body.append(kv('Personel', st.staff.length));
     this.body.append(kv('Hijyen', Math.round(st.hygiene)));
-    this.body.append(kv('Koloni statüsü', {
-      conventional: 'Konvansiyonel', spf: 'SPF', germ_free: 'Germ-free'
+    this.body.append(kv('Barındırma statüsü', {
+      conventional: 'Konvansiyonel', barrier: 'Bariyerli yetiştirme'
     }[st.colonyStatus]));
+    this.body.append(kv('Biyogüvenlik seviyesi', `BGS-${st.biosafetyLevel}`));
+    this.body.append(kv('Hayvan refahı birimi', st.hasWelfareUnit ? 'VAR' : 'YOK'));
     this.body.append(kv('Çalışma izni', st.hasOperatingLicense ? 'VAR' : 'YOK'));
     this.body.append(kv('HADYEK', st.hadyekEstablished ? 'Kuruldu' : 'Kurulmadı'));
     this.body.append(kv('Pest baskısı', Math.round(this.sys.biosecurity.pestPressure)));

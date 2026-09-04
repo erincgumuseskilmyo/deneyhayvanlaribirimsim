@@ -1,5 +1,5 @@
 import { $, el, clear } from './dom.js';
-import { SOURCE_LABELS, getKnowledge } from '../data/knowledge.js';
+import { SOURCE_LABELS, BOOK, getKnowledge } from '../data/knowledge.js';
 
 /**
  * Tek modal katmanı: olaylar, etik kurul, raporlar, quiz, bilgi kartları.
@@ -54,7 +54,9 @@ export class Modal {
     return el('div', { class: 'knowledge' }, [
       el('strong', { text: `Bu neden önemli? — ${k.title}` }),
       el('p', { text: k.text }),
-      el('span', { class: 'src', text: `Kaynak: ${SOURCE_LABELS[k.source]}` })
+      el('span', { class: 'src', text: k.ref
+        ? `Kaynak: ${BOOK.title} — ${k.ref}`
+        : SOURCE_LABELS[k.source] })
     ]);
   }
 

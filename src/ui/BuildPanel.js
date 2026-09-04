@@ -1,5 +1,5 @@
 import { $, el, clear } from './dom.js';
-import { ROOM_LIST } from '../data/rooms.js';
+import { ROOM_LIST, ROOM_GROUPS } from '../data/rooms.js';
 import { money } from '../core/utils.js';
 
 /**
@@ -48,14 +48,12 @@ export class BuildPanel {
       }, '⛏ Yıkım modu')
     ]));
 
-    const groups = [
-      { title: 'Başlangıç Odaları', tier: 1 },
-      { title: 'İleri Seviye Odalar', tier: 2 }
-    ];
-
-    for (const g of groups) {
-      this.root.append(el('h3', { text: g.title }));
-      for (const def of ROOM_LIST.filter((r) => r.tier === g.tier)) {
+    // Odalar, kaynak kitaptaki işlev gruplarına göre listelenir (Bölüm 3, s. 46)
+    for (const [key, title] of Object.entries(ROOM_GROUPS)) {
+      const rooms = ROOM_LIST.filter((r) => r.group === key);
+      if (!rooms.length) continue;
+      this.root.append(el('h3', { text: title }));
+      for (const def of rooms) {
         const locked = def.tier > 1 && st.facilityLevel < 2;
         const affordable = st.canAfford(def.cost);
         const count = st.roomsOfType(def.id).length;

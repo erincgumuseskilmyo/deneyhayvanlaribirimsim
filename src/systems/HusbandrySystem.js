@@ -1,5 +1,8 @@
 import { clamp, avg } from '../core/utils.js';
 
+/** Kafesler haftada bir-iki kez değiştirilir (Bölüm 5, s. 109). */
+export const CAGE_CLEAN_INTERVAL_DAYS = 4;
+
 /**
  * Günlük bakım işleri: kafeslerin kirlenmesi, temizlenmesi,
  * yem/su durumu ve zenginleştirme.
@@ -42,8 +45,10 @@ export class HusbandrySystem {
 
     // --- Kafeslerin kirlenmesi ---
     for (const cage of cages) {
-      const occupants = st.animalsInCage(cage.id).length;
-      const load = occupants / Math.max(1, cage.capacity);
+      const occ = st.animalsInCage(cage.id);
+      const occupants = occ.length;
+      const cap = occupants ? cage.capacityForSpecies(occ[0].species, occ[0].weight) : 1;
+      const load = occupants / Math.max(1, cap);
       const soilRate = 5 + load * 9;
       cage.soil(soilRate);
       // Yem/su: kapsam düşükse aksama olasılığı artar
@@ -56,14 +61,33 @@ export class HusbandrySystem {
     }
 
     // --- Temizlik ---
+    // "Farklı bir durum söz konusu değilse kafesler haftada bir-iki kez
+    //  değiştirilmeli, uygun deterjan ile yıkanmalı ve iyi bir şekilde
+    //  durulanmalıdır." (Bölüm 5, s. 109)
     let budget = this.cleaningCapacity();
-    const queue = [...cages].sort((a, b) => a.cleanliness - b.cleanliness);
+    const queue = [...cages].sort((a, b) => b.daysSinceCleaning - a.daysSinceCleaning);
     let cleaned = 0;
     for (const cage of queue) {
-      if (cage.cleanliness > 70) break;
+      if (cage.daysSinceCleaning < CAGE_CLEAN_INTERVAL_DAYS && cage.cleanliness > 55) continue;
       const cost = 8 * cage.def.cleaningDifficulty;
       if (budget < cost) break;
       budget -= cost;
+
+      // "Yeni yavruları olmuş bir farenin kafesini veya altlık malzemesinin
+      //  değiştirilmesi stresi arttıracağı için anne farenin yavrularını yemesine
+      //  sebep olabilir." (Bölüm 5, s. 109)
+      const occupants = st.animalsInCage(cage.id);
+      const nursing = occupants.find((a) => a.reproductiveStatus === 'nursing');
+      if (nursing && cage.daysSinceCleaning < CAGE_CLEAN_INTERVAL_DAYS * 2) continue;
+      if (nursing && this.rng.chance(0.12)) {
+        const pups = occupants.filter((a) => a.age < nursing.speciesData.weaningDays);
+        const victim = this.rng.pick(pups);
+        if (victim) {
+          victim.die('kannibalizm');
+          st.addLog('Emziren dişinin kafesi değiştirildi; stres sonucu yavru kaybı yaşandı.', 'bad');
+          this.bus.emit('husbandry:cannibalism', { cageId: cage.id });
+        }
+      }
       cage.clean();
       cleaned += 1;
     }

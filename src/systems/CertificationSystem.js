@@ -1,6 +1,6 @@
 import { clamp } from '../core/utils.js';
 import { CertificationCourse } from '../entities/CertificationCourse.js';
-import { COURSE_ECONOMY } from '../data/courseModules.js';
+import { COURSE_ECONOMY, COURSE_RULES } from '../data/courseModules.js';
 
 /**
  * DENEY HAYVANLARI KULLANIM SERTİFİKA PROGRAMI
@@ -57,7 +57,8 @@ export class CertificationSystem {
       startDay: st.day, studentCount: n, quality: this.courseQuality()
     });
     st.courses.push(course);
-    st.addLog(`Sertifika programı açıldı: ${n} kursiyer.`, 'good');
+    st.addLog(`Sertifika programı açıldı: ${n} kursiyer. ` +
+      `Program HADMEK'e ${COURSE_RULES.notifyHadmekDaysBefore} gün önceden bildirildi.`, 'good');
     this.bus.emit('certification:opened', course);
     return { ok: true, course };
   }
@@ -78,17 +79,25 @@ export class CertificationSystem {
   runExam(course) {
     const st = this.state;
     const scores = [];
-    let certified = 0; let failed = 0;
+    let certified = 0; let failed = 0; let absent = 0;
 
     for (let i = 0; i < course.studentCount; i++) {
       // Puan: eğitim kalitesi merkezli, bireysel varyans eklenir
       const base = 42 + course.quality * 45;
       const score = clamp(Math.round(base + this.rng.range(-16, 16)), 0, 100);
       scores.push(score);
-      if (score >= COURSE_ECONOMY.passMark) certified += 1; else failed += 1;
+      // Devam zorunluluğu: eğitimin %80'ine devam etmeyen aday sınavda başarılı sayılmaz
+      const attendance = clamp(0.72 + this.rng.range(0, 0.35), 0, 1);
+      const attended = attendance >= COURSE_RULES.attendanceRequirement;
+      if (attended && score >= COURSE_RULES.passMark) certified += 1; else failed += 1;
+      if (!attended) absent += 1;
     }
 
-    course.results = { certified, failed, scores, passMark: COURSE_ECONOMY.passMark };
+    course.results = {
+      certified, failed, absent, scores,
+      passMark: COURSE_RULES.passMark,
+      attendanceRequirement: COURSE_RULES.attendanceRequirement
+    };
     course.status = 'finished';
     this.totalCertified += certified;
     this.totalFailed += failed;

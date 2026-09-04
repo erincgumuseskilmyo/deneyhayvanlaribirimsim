@@ -1,6 +1,6 @@
 import { el, kv } from '../dom.js';
 import { money } from '../../core/utils.js';
-import { DECISIONS } from '../../systems/EthicsSystem.js';
+import { DECISIONS, DECISION_INFO, DECISION_DEADLINE_DAYS } from '../../systems/EthicsSystem.js';
 import { REVIEW_GUIDE, STUDY_TYPES, HOUSING_OPTIONS } from '../../data/researchTemplates.js';
 import { getSpecies } from '../../data/species.js';
 
@@ -23,8 +23,18 @@ export function ethicsScreen(state, systems, bus, modal) {
   }
 
   wrap.append(el('p', { class: 'hint', text:
-    'Kurul üyesi olarak her başvuruyu 3R açısından değerlendirin. ' +
-    'Doğru karar, başvurunun bulgularına göre değişir.' }));
+    'Kurul üyesi olarak her başvuruyu 3R ilkeleri ve başvuru formunun eksiksizliği ' +
+    `açısından değerlendirin. Kararlar başvurudan itibaren ${DECISION_DEADLINE_DAYS} iş günü ` +
+    'içinde bildirilmelidir.' }));
+
+  wrap.append(el('h3', { text: 'Verilebilecek Kararlar' }));
+  for (const d of Object.values(DECISIONS)) {
+    wrap.append(el('div', { class: 'kv' }, [
+      el('span', { text: DECISION_INFO[d].label }),
+      el('span', { style: 'font-weight:400;text-align:right;max-width:65%',
+                   text: DECISION_INFO[d].desc })
+    ]));
+  }
 
   wrap.append(el('h3', { text: 'Değerlendirme Rehberi' }));
   wrap.append(el('ul', { class: 'hint' }, REVIEW_GUIDE.map((g) => el('li', { text: g }))));
@@ -87,6 +97,12 @@ function applicationCard(p, systems, bus, modal) {
   card.append(el('p', { class: 'hint', text: `Tür gerekçesi: ${p.speciesJustification || '— belirtilmemiş —'}` }));
   card.append(el('p', { class: 'hint', text: `İşlemler: ${p.procedures.map((x) => x.name).join(', ')}` }));
   card.append(el('p', { class: 'hint', text: `Maddeler: ${p.substances.join(', ') || '—'}` }));
+  card.append(kv('Hayvanların temin edileceği yer', p.animalSource || '— belirtilmemiş —'));
+  card.append(kv('Kısıtlayıcı durumlar', p.restrictions || '— belirtilmemiş —'));
+  card.append(kv('Tehlikeli durumlar', p.hazards || '— belirtilmemiş —'));
+  card.append(kv('Tıbbi atıklar ve imhası', p.wasteDisposal || '— belirtilmemiş —'));
+  card.append(kv('Ön çalışma verisi', p.preliminaryDataAvailable ? 'Var' : 'Yok'));
+  if (p.pilotCompleted) card.append(el('span', { class: 'tag good', text: 'Ön deney tamamlandı' }));
 
   card.append(el('h4', { text: '3R Beyanı' }));
   card.append(kv('Replacement alternatifi var mı?', p.replacementAvailable ? 'EVET' : 'Hayır'));
@@ -114,11 +130,16 @@ function applicationCard(p, systems, bus, modal) {
     }, 80);
   };
 
-  card.append(el('div', { class: 'modal-actions' }, [
-    el('button', { class: 'primary', onClick: () => decide(DECISIONS.APPROVE) }, 'APPROVE'),
-    el('button', { onClick: () => decide(DECISIONS.REQUEST_REVISION) }, 'REQUEST_REVISION'),
-    el('button', { class: 'danger', onClick: () => decide(DECISIONS.REJECT) }, 'REJECT')
-  ]));
+  const actions = el('div', { class: 'modal-actions' });
+  for (const d of [DECISIONS.APPROVE, DECISIONS.REQUEST_REVISION,
+                   DECISIONS.CONDITIONAL, DECISIONS.REJECT]) {
+    actions.append(el('button', {
+      class: d === DECISIONS.APPROVE ? 'primary' : d === DECISIONS.REJECT ? 'danger' : '',
+      title: DECISION_INFO[d].desc,
+      onClick: () => decide(d)
+    }, DECISION_INFO[d].label));
+  }
+  card.append(actions);
 
   return card;
 }

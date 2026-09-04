@@ -46,12 +46,18 @@ export class DiseaseSystem {
     p += clamp(this.biosec.pestPressure - 40, 0, 60) * 0.00010;
 
     const cages = st.cagesInRoom(room.id);
-    const overcrowded = cages.filter((c) => st.animalsInCage(c.id).length > c.capacity).length;
+    // Aşırı kalabalık kafes sayısı: kapasite tür ve canlı ağırlığa göre hesaplanır
+    // (Bölüm 3, Tablo 3.2-3.7).
+    const overcrowded = cages.filter((c) => {
+      const occ = st.animalsInCage(c.id);
+      if (!occ.length) return false;
+      return occ.length > c.capacityForSpecies(occ[0].species, occ[0].weight);
+    }).length;
     p += overcrowded * 0.0006;
 
     if (room.quarantined) p *= 0.25;
-    if (st.colonyStatus === 'spf') p *= 0.55;
-    if (st.colonyStatus === 'germ_free') p *= 0.35;
+    if (st.colonyStatus === 'barrier') p *= 0.5;
+    if (st.biosafetyLevel >= 3) p *= 0.7;
     return clamp(p, 0, 0.2);
   }
 

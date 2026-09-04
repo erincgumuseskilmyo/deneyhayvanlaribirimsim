@@ -38,8 +38,8 @@ export class BiosecuritySystem {
     score -= this.wasteBacklog * 0.2;
 
     // Teknoloji
-    if (st.unlockedTech.has('spf_facility')) score += 12;
-    if (st.unlockedTech.has('germ_free')) score += 10;
+    if (st.unlockedTech.has('barrier_housing')) score += 12;
+    score += (st.biosafetyLevel - 1) * 5;   // BGS-1..4 (Bölüm 8, s. 175-176)
 
     // Aktif hastalık varsa düşer
     const infected = st.rooms.filter((r) => r.diseaseLevel > 20).length;

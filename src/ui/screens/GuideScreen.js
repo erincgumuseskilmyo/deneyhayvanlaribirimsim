@@ -1,5 +1,5 @@
 import { el } from '../dom.js';
-import { KNOWLEDGE, SOURCE_LABELS } from '../../data/knowledge.js';
+import { KNOWLEDGE, SOURCE_LABELS, BOOK } from '../../data/knowledge.js';
 
 /**
  * Bilgi bankası — tüm eğitim kartları, kaynak etiketleriyle birlikte.
@@ -8,13 +8,14 @@ export function guideScreen() {
   const wrap = el('div');
 
   wrap.append(el('div', { class: 'knowledge' }, [
-    el('strong', { text: 'Kaynak Kullanımı Hakkında' }),
+    el('strong', { text: 'Kaynak Kitap' }),
     el('p', { text:
-      'Bu simülasyonun eğitim içeriği "LABORATUVAR HAYVANLARINI YETİŞTİRME VE SAĞLIĞI" ' +
-      'kaynak kitabına dayandırılmak üzere tasarlanmıştır. Kitap dosyası depoya henüz ' +
-      'eklenmediği için hiçbir cümle doğrudan kitaba atfedilmemiştir. Aşağıdaki kartlar ' +
-      'kaynak etiketleriyle ayrılmıştır: "Genel bilgi" kartları kitapla doğrulanmalı, ' +
-      '"Oyun tasarımı kararı" kartları ise bilimsel iddia içermez.' }),
+      `${BOOK.title}. ${BOOK.editor}. ${BOOK.publisher}. ` +
+      `E-ISBN ${BOOK.isbn}, ${BOOK.year}.` }),
+    el('p', { text:
+      'Aşağıdaki kartların büyük bölümü doğrudan bu kitaptan üretilmiştir ve her birinin ' +
+      'yanında bölüm/sayfa referansı verilmiştir. "Kitapta yer almayan genel bilgi" ve ' +
+      '"Oyun tasarımı kararı" etiketli kartlar kitaba atfedilmez.' }),
     el('span', { class: 'src', text: 'Ayrıntı için depodaki docs/KAYNAK.md dosyasına bakın.' })
   ]));
 
@@ -23,7 +24,7 @@ export function guideScreen() {
 
   const titles = {
     book: 'Kaynak Kitaptan Alınan İçerik',
-    general: 'Genel Bilgi (kaynak kitapla doğrulanmalı)',
+    general: 'Kitapta Yer Almayan Genel Bilgi',
     game: 'Oyun Tasarımı Kararları'
   };
 
@@ -38,7 +39,9 @@ export function guideScreen() {
       wrap.append(el('div', { class: 'list-item' }, [
         el('h4', { text: k.title }),
         el('p', { text: k.text }),
-        el('span', { class: 'src', text: `Kaynak: ${SOURCE_LABELS[k.source]}` })
+        el('span', { class: 'src', text: k.ref
+          ? `Kaynak: ${BOOK.title} — ${k.ref}`
+          : SOURCE_LABELS[k.source] })
       ]));
     }
   }

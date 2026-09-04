@@ -30,6 +30,22 @@ function buildFacility(game) {
   return state.rooms.find((r) => r.type === 'animal');
 }
 
+/**
+ * Kitaptaki başvuru formunun tüm zorunlu alanları doldurulmuş, bulgusuz başvuru.
+ * (Bölüm 2, s. 33-34)
+ */
+function cleanProject(extra = {}) {
+  return new ResearchProject({
+    speciesJustification: 'Tür seçimi literatürle uyumlu olarak gerekçelendirilmiştir.',
+    housingConditions: 'group_enriched',
+    animalSource: 'Kurum bünyesindeki çalışma izinli üretim ünitesi',
+    wasteDisposal: 'Tıbbi Atıkların Kontrolü Yönetmeliği kapsamında bertaraf edilecektir.',
+    hazards: 'Mikrobiyolojik kontaminasyon riski bulunmamaktadır.',
+    animalNumber: 20,
+    ...extra
+  });
+}
+
 let _staffModule;
 function require_staff() { return _staffModule; }
 _staffModule = await import('../src/entities/StaffMember.js');
@@ -83,7 +99,7 @@ test('Çalışma izni koşulları eksikken verilmez, tamamlanınca verilir', () 
 test('Koloni kurulur, hayvanlar üretilir ve nüfus artar', () => {
   const game = new Game({ seed: 3 });
   const room = buildFacility(game);
-  game.systems.facility.buyCages(room.id, 'improved', 8);
+  game.systems.facility.buyCages(room.id, 'shoebox', 8);
   const res = game.systems.facility.foundColony(room.id, 'mouse', 4);
   assert.equal(res.ok, true, res.reason);
   assert.equal(game.state.livingAnimals.length, 12);
@@ -98,7 +114,7 @@ test('Koloni kurulur, hayvanlar üretilir ve nüfus artar', () => {
 test('Refah, koşullar kötüleştiğinde düşer', () => {
   const game = new Game({ seed: 4 });
   const room = buildFacility(game);
-  game.systems.facility.buyCages(room.id, 'improved', 8);
+  game.systems.facility.buyCages(room.id, 'shoebox', 8);
   game.systems.facility.foundColony(room.id, 'mouse', 4);
   for (let i = 0; i < 30; i++) game.time.tickDay();
   const goodWelfare = game.state.animalWelfare;
@@ -115,7 +131,7 @@ test('Etik kurul: replacement mevcutsa ideal karar REJECT olur', () => {
   const game = new Game({ seed: 5 });
   const st = game.state;
   st.hadyekEstablished = true;
-  const p = new ResearchProject({ replacementAvailable: true, speciesJustification: 'yeterli gerekçe metni' });
+  const p = cleanProject({ replacementAvailable: true });
   st.applications.push(p);
   assert.equal(game.systems.ethics.idealDecision(p), DECISIONS.REJECT);
 
@@ -129,10 +145,7 @@ test('Etik kurul: temiz başvuruda APPROVE doğrudur ve proje listeye geçer', (
   const game = new Game({ seed: 6 });
   const st = game.state;
   st.hadyekEstablished = true;
-  const p = new ResearchProject({
-    speciesJustification: 'Tür seçimi literatürle uyumlu olarak gerekçelendirilmiştir.',
-    housingConditions: 'group_enriched'
-  });
+  const p = cleanProject();
   assert.equal(p.auditFindings().length, 0);
   st.applications.push(p);
   const res = game.systems.ethics.decide(p.id, DECISIONS.APPROVE);
@@ -164,7 +177,7 @@ test('Sertifika kursu tamamlanır ve CERTIFIED/FAILED üretir', () => {
 test('Salgın kararları farklı sonuçlar üretir', () => {
   const game = new Game({ seed: 8 });
   const room = buildFacility(game);
-  game.systems.facility.buyCages(room.id, 'standard', 6);
+  game.systems.facility.buyCages(room.id, 'shoebox', 6);
   game.systems.facility.foundColony(room.id, 'mouse', 4);
 
   game.systems.disease.triggerOutbreak(room);
@@ -213,7 +226,7 @@ test('Uzun süreli simülasyon hatasız çalışır ve sayısal değerler geçer
   const room = buildFacility(game);
   game.systems.facility.applyForLicense();
   game.systems.ethics.establishHadyek();
-  game.systems.facility.buyCages(room.id, 'improved', 10);
+  game.systems.facility.buyCages(room.id, 'shoebox', 10);
   game.systems.facility.foundColony(room.id, 'mouse', 4);
 
   for (let i = 0; i < 400; i++) {
@@ -239,8 +252,8 @@ test('Uzun süreli simülasyon hatasız çalışır ve sayısal değerler geçer
 
 test('Hayvan piyasa değeri statü ve genetiğe göre artar', () => {
   const base = new Animal({ species: 'mouse' });
-  const spf = new Animal({ species: 'mouse', microbiologicalStatus: 'spf' });
+  const barrier = new Animal({ species: 'mouse', microbiologicalStatus: 'barrier' });
   const ko = new Animal({ species: 'mouse', genetics: 'knockout' });
-  assert.ok(spf.marketValue() > base.marketValue());
+  assert.ok(barrier.marketValue() > base.marketValue());
   assert.ok(ko.marketValue() > base.marketValue());
 });

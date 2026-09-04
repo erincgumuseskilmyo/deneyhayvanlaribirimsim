@@ -79,7 +79,34 @@ export class ResearchSystem {
       welfareRisk: maxSeverity,
       replacementAvailable,
       reductionPossible,
-      refinementPossible
+      refinementPossible,
+      // Kitaptaki başvuru formunun diğer alanları (Bölüm 2, s. 33-34)
+      animalSource: rng.chance(0.78)
+        ? rng.pick([
+            'Kurum bünyesindeki çalışma izinli deney hayvanı üretim ünitesi',
+            'Tarım ve Orman Bakanlığından çalışma izinli tedarikçi kuruluş'
+          ])
+        : '',
+      restrictions: rng.chance(0.7)
+        ? rng.pick([
+            'Çalışma süresince periyodik uygulama yapılacaktır.',
+            'Uzun anestezi derinliği gerektiren aşama bulunmamaktadır.',
+            'Deney süresince yem kısıtlaması uygulanacaktır.'
+          ])
+        : '',
+      hazards: rng.chance(0.72)
+        ? rng.pick([
+            'Mikrobiyolojik kontaminasyon riski bulunmamaktadır.',
+            'Kanserojen madde kullanımı nedeniyle çeker ocak kullanılacaktır.',
+            'Biyolojik toksin kullanılmayacaktır.'
+          ])
+        : '',
+      wasteDisposal: rng.chance(0.75)
+        ? 'Oluşacak tıbbi atıklar, Tıbbi Atıkların Kontrolü Yönetmeliği kapsamında ' +
+          'kırmızı torbalarda toplanarak bertaraf edilecektir.'
+        : '',
+      preliminaryDataAvailable: rng.chance(0.45),
+      submittedDay: st.day
     });
 
     // Ödeme: hayvan sayısı, şiddet ve süreye bağlı

@@ -30,12 +30,15 @@ export class GameState {
     // Kilitler / ilerleme
     this.unlockedSpecies = new Set(['mouse']);
     this.unlockedTech = new Set(['standard_colony']);
-    this.hasOperatingLicense = false;   // çalışma izni
-    this.hadyekEstablished = false;     // yerel etik kurul (HADYEK) kuruldu mu
+    this.hasOperatingLicense = false;   // Tarım ve Orman Bakanlığı çalışma izni
+    this.hasWelfareUnit = false;        // hayvan refahı birimi (Bölüm 2, s. 28)
+    this.hadyekEstablished = false;     // yerel etik kurul (HADYEK)
 
     // Tesis kalitesi (sistemler günlük hesaplar)
     this.hygiene = 70;
-    this.colonyStatus = 'conventional'; // conventional | spf | germ_free
+    // Barındırma statüsü: konvansiyonel ya da bariyerli yetiştirme (Bölüm 3, s. 52)
+    this.colonyStatus = 'conventional'; // conventional | barrier
+    this.biosafetyLevel = 1;            // BGS-1..4 (Bölüm 8, s. 175-176)
 
     // Kayıt/rapor
     this.ledger = [];       // {day, type, label, amount}

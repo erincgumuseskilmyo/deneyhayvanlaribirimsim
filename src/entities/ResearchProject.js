@@ -26,8 +26,18 @@ export class ResearchProject {
     this.reductionPossible = data.reductionPossible ?? false;
     this.refinementPossible = data.refinementPossible ?? false;
 
+    // --- Kitaptaki başvuru formunun diğer zorunlu alanları (Bölüm 2, s. 33-34) ---
+    this.animalSource = data.animalSource ?? '';          // Hayvanların temin edileceği yer
+    this.restrictions = data.restrictions ?? '';          // Kısıtlayıcı durumlar
+    this.hazards = data.hazards ?? '';                    // Tehlikeli durumlar
+    this.wasteDisposal = data.wasteDisposal ?? '';        // Tıbbi atıklar ve imhası
+    this.preliminaryDataAvailable = data.preliminaryDataAvailable ?? false;
+    this.pilotCompleted = false;
+
     // Süreç durumu
-    this.status = 'pending'; // pending | revision | approved | rejected | running | completed | failed
+    this.submittedDay = data.submittedDay ?? 0;
+    // pending | revision | conditional | approved | rejected | running | completed | failed
+    this.status = 'pending';
     this.decisionDay = null;
     this.startDay = null;
     this.progress = 0;       // 0-100
@@ -76,11 +86,43 @@ export class ResearchProject {
         text: 'Gerekçesiz bireysel barındırma öngörülmüş.'
       });
     }
+    // Kitaptaki başvuru formu alanları (Bölüm 2, s. 33-34)
+    if (!this.animalSource) {
+      issues.push({
+        key: 'source', severity: 'medium',
+        text: 'Hayvanların temin edileceği yer belirtilmemiş. Araştırmacılar yönetmelikle ' +
+              'belirlenmiş birimlerin dışından deney hayvanı sağlayamaz.'
+      });
+    }
+    if (!this.wasteDisposal) {
+      issues.push({
+        key: 'waste', severity: 'medium',
+        text: 'Oluşacak tıbbi atıklar ve imhası için alınacak önlemler belirtilmemiş.'
+      });
+    }
+    if (!this.hazards) {
+      issues.push({
+        key: 'hazards', severity: 'low',
+        text: 'Deney sırasında/sonrasında ortaya çıkabilecek tehlikeli durumlar belirtilmemiş.'
+      });
+    }
     return issues;
   }
 
   /** Sorunsuz bir başvuru mu? */
   get isClean() { return this.auditFindings().length === 0; }
+
+  /**
+   * "HADYEK, bir projenin yapılabilirliğini sınamak amacıyla az sayıda hayvan
+   *  üzerinde ön deneylerin yapılmasını 'şartlı olarak uygun' kararı alarak
+   *  isteyebilir." (Bölüm 2, s. 30)
+   * Oyunda ölçüt: ön çalışma verisi yoksa ve talep edilen hayvan sayısı yüksekse.
+   */
+  needsPilot() {
+    if (this.pilotCompleted) return false;
+    if (this.preliminaryDataAvailable) return false;
+    return this.animalNumber >= 40;
+  }
 
   /** Yalnızca düzeltme ile giderilebilir sorunlar mı var? */
   get isRevisable() {

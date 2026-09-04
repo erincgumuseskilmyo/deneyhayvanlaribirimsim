@@ -83,7 +83,8 @@ export class BreedingSystem {
     const welfareFactor = clamp(female.welfare / 100, 0, 1);
     const stressFactor = clamp(1 - female.stress / 130, 0.2, 1);
     const healthFactor = clamp(female.health / 100, 0, 1);
-    const density = this.state.animalsInCage(cage.id).length / Math.max(1, cage.capacity);
+    const cap = cage.capacityForSpecies(female.species, female.weight);
+    const density = this.state.animalsInCage(cage.id).length / Math.max(1, cap);
     const densityFactor = density > 1 ? 0.5 : 1;
     return 0.075 * welfareFactor * stressFactor * healthFactor * densityFactor;
   }

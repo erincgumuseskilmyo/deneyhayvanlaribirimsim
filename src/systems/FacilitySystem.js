@@ -228,6 +228,9 @@ export class FacilitySystem {
     if (t.requiresRoom && !st.hasRoom(t.requiresRoom)) {
       return { ok: false, reason: `${getRoomType(t.requiresRoom).name} gerekli.` };
     }
+    if (t.requiresStaff && st.staffOfRole(t.requiresStaff).length === 0) {
+      return { ok: false, reason: 'Veteriner hekim gerekli.' };
+    }
     if (!st.canAfford(t.cost)) return { ok: false, reason: 'Yetersiz bütçe.' };
     return { ok: true };
   }
@@ -244,6 +247,8 @@ export class FacilitySystem {
       st.colonyStatus = t.setsColonyStatus;
       for (const a of st.livingAnimals) a.microbiologicalStatus = t.setsColonyStatus;
     }
+    if (t.setsBiosafetyLevel) st.biosafetyLevel = Math.max(st.biosafetyLevel, t.setsBiosafetyLevel);
+    if (t.setsWelfareUnit) st.hasWelfareUnit = true;
     st.addLog(`${t.name} devreye alındı.`, 'good');
     this.recomputeFacilityLevel();
     this.bus.emit('facility:changed');
@@ -258,8 +263,8 @@ export class FacilitySystem {
     let level = 1;
     if (distinct >= 6 && st.hasOperatingLicense) level = 2;
     if (distinct >= 9 && tier2 >= 2) level = 3;
-    if (distinct >= 11 && st.unlockedTech.has('spf_facility')) level = 4;
-    if (st.unlockedTech.has('germ_free') && tier2 >= 5) level = 5;
+    if (distinct >= 11 && st.unlockedTech.has('barrier_housing')) level = 4;
+    if (st.unlockedTech.has('bgs3') && tier2 >= 5) level = 5;
     if (level !== st.facilityLevel) {
       st.facilityLevel = level;
       st.addLog(`Tesis seviyesi ${level} oldu.`, 'good');
@@ -301,7 +306,7 @@ export class FacilitySystem {
     const st = this.state;
     const cages = st.cagesInRoom(roomId);
     for (const c of cages) {
-      if (st.animalsInCage(c.id).length < c.capacity) {
+      if (st.animalsInCage(c.id).length < c.capacityForSpecies(animal.species)) {
         animal.cageId = c.id; animal.roomId = roomId;
         return true;
       }
