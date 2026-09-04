@@ -8,12 +8,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test \"tests/*.test.js\""
+    "test": "node --test \"tests/*.test.js\"",
+    "build:single": "vite build --config vite.single.config.js"
   },
   "dependencies": {
     "three": "^0.169.0"
   },
   "devDependencies": {
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }

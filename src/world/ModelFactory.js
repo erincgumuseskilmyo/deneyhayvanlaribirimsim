@@ -90,6 +90,11 @@ export class ModelFactory {
     const url = `${baseUrl}models/manifest.json`.replace(/([^:]\/)\/+/g, '$1');
     const result = { loaded: [], missing: [], manifest: false };
 
+    // Dosyadan (file://) açıldığında fetch her hâlükârda başarısız olur ve
+    // tarayıcı konsoluna gereksiz bir ağ hatası yazar. Tek dosyalık dağıtımda
+    // zaten harici model bulunmaz; aramayı hiç yapmıyoruz.
+    if (typeof location !== 'undefined' && location.protocol === 'file:') return result;
+
     let manifest;
     try {
       const res = await fetch(url);

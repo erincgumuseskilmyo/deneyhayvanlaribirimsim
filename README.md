@@ -28,11 +28,17 @@ Ayrıntılı eşleme tablosu: [`docs/KAYNAK.md`](docs/KAYNAK.md).
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # dist/ üretir
+npm run dev           # http://localhost:5173
+npm run build         # dist/ üretir
 npm run preview
-npm test         # 30 test: 15 simülasyon + 15 kaynak kitap/varlık uyumu (tarayıcı gerekmez)
+npm run build:single  # dist-single/index.html — tek dosya, çift tıkla çalışır
+npm test              # 30 test (tarayıcı gerekmez)
 ```
+
+**Kurulum yapmadan denemek:** `npm run build:single` komutu her şeyi (JS, CSS,
+three.js) tek bir HTML dosyasına gömer. Oluşan `dist-single/index.html`
+dosyasını tarayıcıda açmanız yeterlidir — sunucu, internet veya Node gerekmez.
+Dosya doğrudan açıldığında harici model araması yapılmaz.
 
 ## Kontroller
 
