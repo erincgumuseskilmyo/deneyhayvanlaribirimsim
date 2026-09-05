@@ -56,6 +56,14 @@
     "cage_metabolism": {
       "file": "cage_metabolism.glb",
       "fitTo": 0.5
+    },
+    "cage_breeding_cage": {
+      "file": "cage_breeding_cage.glb",
+      "fitTo": 0.79
+    },
+    "cage_wire_pen": {
+      "file": "cage_wire_pen.glb",
+      "fitTo": 1.64
     }
   }
 }

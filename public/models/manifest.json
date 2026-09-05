@@ -4,6 +4,10 @@
     "animal_mouse": {
       "file": "animal_mouse.glb",
       "fitTo": 0.32
+    },
+    "animal_rabbit": {
+      "file": "animal_rabbit.glb",
+      "fitTo": 0.6
     }
   }
 }

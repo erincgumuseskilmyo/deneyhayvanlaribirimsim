@@ -243,7 +243,9 @@ export class ModelFactory {
     // "Farklı odalarda yetiştirilen hayvanların her birinin odasının üzerine
     //  o odada barındırılan tür ile ilgili tabela asılması gerekir." (Bölüm 3, s. 51)
     const sign = this.buildSign(def.name, def.color);
-    sign.position.set(0, WALL_H + 0.32, room.d / 2 + 0.02);
+    // Tabela duvarın belirgin biçimde üstünde durur; alçak kalınca yakın
+    // zoom'da oda içeriğini kapatıyordu.
+    sign.position.set(0, WALL_H + 0.52, room.d / 2 + 0.02);
     sign.userData.isSign = true;
     group.add(sign);
     group.userData.sign = sign;
@@ -261,8 +263,10 @@ export class ModelFactory {
     const group = new THREE.Group();
     group.userData = { kind: 'cage', id: cage.id };
 
-    const scale = cage.type === 'metabolism' ? 0.5 : 0.62;
-    const h = 0.26;
+    // Görsel boyut taban alanından türetilir: 800 cm² -> 0,62 birim.
+    // Sabit değer, geniş kafeslerin küçük görünmesine yol açıyordu.
+    const scale = 0.62 * Math.sqrt((cage.def.floorArea ?? 800) / 800);
+    const h = 0.26 * Math.min(1.6, Math.sqrt((cage.def.height ?? 18) / 18));
 
     const body = new THREE.Mesh(
       new THREE.BoxGeometry(scale, h, scale * 0.78),
@@ -343,7 +347,7 @@ export class ModelFactory {
     const texture = new THREE.CanvasTexture(canvas);
     texture.anisotropy = 4;
     const mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.25, 0.31),
+      new THREE.PlaneGeometry(0.95, 0.24),
       new THREE.MeshBasicMaterial({ map: texture, transparent: true })
     );
     mesh.userData.canvas = canvas;

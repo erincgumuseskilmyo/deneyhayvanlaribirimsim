@@ -252,3 +252,38 @@ test('Model manifest örneği koddaki tür ve kafes adlarıyla uyumlu', async ()
       `animal_${id}: fitTo, species.scale ile aynı olmalı`);
   }
 });
+
+test('Her tür en az bir kafes tipinde barınabilir', async () => {
+  const { CAGE_TYPES } = await import('../src/data/cages.js');
+  const { Cage } = await import('../src/entities/Cage.js');
+
+  for (const [id, sp] of Object.entries(SPECIES)) {
+    const caps = Object.keys(CAGE_TYPES).map(
+      (type) => new Cage({ type, roomId: 'x' }).capacityForSpecies(id)
+    );
+    assert.ok(caps.some((c) => c > 0),
+      `${id} hiçbir kafeste barınamıyor — minimum bölme ${sp.housing.minCompartmentArea} cm², ` +
+      `en büyük kafes ${Math.max(...Object.values(CAGE_TYPES).map((c) => c.floorArea))} cm²`);
+  }
+});
+
+test('Kafes kapasitesi türün minimum bölme ve yükseklik ölçüsüne uyar', async () => {
+  const { CAGE_TYPES } = await import('../src/data/cages.js');
+  const { Cage } = await import('../src/entities/Cage.js');
+
+  for (const [id, sp] of Object.entries(SPECIES)) {
+    for (const [type, def] of Object.entries(CAGE_TYPES)) {
+      const cap = new Cage({ type, roomId: 'x' }).capacityForSpecies(id);
+      const yeterli = def.floorArea >= sp.housing.minCompartmentArea &&
+                      def.height >= sp.housing.minHeight;
+      if (!yeterli) {
+        assert.equal(cap, 0,
+          `${id} / ${type}: ölçü yetersizken kapasite 0 olmalı (${cap} bulundu)`);
+      }
+      // Metabolizma kafesi tek bireyliktir (Bölüm 3, s. 58)
+      if (def.singleOccupancy) assert.ok(cap <= 1, `${type} tek bireylik olmalı`);
+      // Grup büyüklüğü üst sınırı aşılmamalı
+      if (def.maxOccupants) assert.ok(cap <= def.maxOccupants, `${id} / ${type}: üst sınır aşıldı`);
+    }
+  }
+});

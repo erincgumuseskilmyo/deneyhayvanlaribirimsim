@@ -94,15 +94,19 @@ export class FacilitySystem {
       return { ok: false, reason: `Bu kafes yalnızca ${getRoomType(def.requiresRoom).name} içine kurulabilir.` };
     }
     if (!room.def.capacity) return { ok: false, reason: 'Bu odaya kafes yerleştirilemez.' };
-    const existing = st.cagesInRoom(roomId).length;
-    const free = room.def.capacity - existing;
-    if (free <= 0) return { ok: false, reason: 'Oda kafes kapasitesi dolu.' };
-    const n = Math.min(count, free);
+    // Büyük kafesler odada daha çok yer kaplar (def.slots).
+    const used = st.cagesInRoom(roomId).reduce((sum, c) => sum + (c.def.slots ?? 1), 0);
+    const free = room.def.capacity - used;
+    const slots = def.slots ?? 1;
+    if (free < slots) {
+      return { ok: false, reason: `Oda kapasitesi yetersiz (${free}/${slots} birim boş).` };
+    }
+    const n = Math.min(count, Math.floor(free / slots));
     const cost = def.cost * n;
     if (!st.canAfford(cost)) return { ok: false, reason: 'Yetersiz bütçe.' };
     st.spend(cost, `${def.name} × ${n}`, 'cage');
     for (let i = 0; i < n; i++) {
-      st.cages.push(new Cage({ type: cageType, roomId, gridIndex: existing + i }));
+      st.cages.push(new Cage({ type: cageType, roomId, gridIndex: st.cagesInRoom(roomId).length }));
     }
     this.bus.emit('facility:changed');
     return { ok: true, count: n, cost };

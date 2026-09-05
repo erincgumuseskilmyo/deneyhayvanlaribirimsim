@@ -16,7 +16,7 @@
  */
 export const CAGE_TYPES = {
   shoebox: {
-    id: 'shoebox', name: 'Ayakkabı Kutusu Kafes (tabanı kapalı)',
+    id: 'shoebox', maxOccupants: 10, slots: 1, name: 'Ayakkabı Kutusu Kafes (tabanı kapalı)',
     cost: 900, maintenance: 6,
     floorArea: 800, height: 18,       // cm² / cm (oyun değeri)
     cleaningDifficulty: 1.3,
@@ -29,7 +29,7 @@ export const CAGE_TYPES = {
     ref: 'Bölüm 3, s. 55'
   },
   grid_floor: {
-    id: 'grid_floor', name: 'Izgara Tabanlı Sürgülü Tepsi Kafes',
+    id: 'grid_floor', maxOccupants: 10, slots: 1, name: 'Izgara Tabanlı Sürgülü Tepsi Kafes',
     cost: 1600, maintenance: 9,
     floorArea: 800, height: 18,
     cleaningDifficulty: 0.8,
@@ -44,7 +44,7 @@ export const CAGE_TYPES = {
     ref: 'Bölüm 3, s. 57; Bölüm 6, s. 120'
   },
   microisolator: {
-    id: 'microisolator', name: 'Mikroizolatör Kapaklı Kafes',
+    id: 'microisolator', maxOccupants: 10, slots: 1, name: 'Mikroizolatör Kapaklı Kafes',
     cost: 3200, maintenance: 18,
     floorArea: 800, height: 18,
     cleaningDifficulty: 1.5,
@@ -57,7 +57,7 @@ export const CAGE_TYPES = {
     ref: 'Bölüm 3, s. 57'
   },
   ivc: {
-    id: 'ivc', name: 'IVC (Bireysel İklimlendirmeli Kafes)',
+    id: 'ivc', maxOccupants: 10, slots: 1, name: 'IVC (Bireysel İklimlendirmeli Kafes)',
     cost: 6500, maintenance: 42,
     floorArea: 800, height: 18,
     cleaningDifficulty: 1.8,
@@ -69,8 +69,38 @@ export const CAGE_TYPES = {
       'patojenden bağımsız özel modeller veya izole çalışmalar haricinde tercih edilmez.',
     ref: 'Bölüm 3, s. 57'
   },
+  breeding_cage: {
+    id: 'breeding_cage', maxOccupants: 8, slots: 2, name: 'Damızlık Kafesi (geniş)',
+    cost: 2400, maintenance: 13,
+    floorArea: 1300, height: 18,
+    cleaningDifficulty: 1.2,
+    welfareBonus: 5, biosecurityBonus: 2,
+    requiresRoom: null,
+    desc:
+      'Damızlık bir çiftin yavrularıyla birlikte barındırılabileceği geniş kafes. ' +
+      'Kitap, gerbillerde damızlık çiftin yavrularıyla birlikte olacağı kafesin ' +
+      '1300 cm² olması ve bir köşesine yuva kutusu konulması gerektiğini belirtir. ' +
+      'Fare, sıçan ve hamster için de kullanılabilir.',
+    ref: 'Bölüm 6, s. 123'
+  },
+  wire_pen: {
+    id: 'wire_pen', maxOccupants: 8, slots: 4, name: 'Tel Örgü Kafes (75×75 cm)',
+    cost: 5200, maintenance: 30,
+    floorArea: 5625, height: 45,
+    cleaningDifficulty: 1.6,
+    welfareBonus: 8, biosecurityBonus: 2,
+    requiresRoom: null,
+    penaltySpecies: ['guinea_pig'],
+    desc:
+      'Kitapta "en büyük boyuttaki tel örgü kafesleri 75’er cm’lik kenarları olan ' +
+      'kafeslerdir" denir; bu boyutta bir kafeste 4 damızlık dişi, 1 erkek ve ' +
+      '2-3 haftalık yavruları birlikte barındırılabilir. Kobay ve tavşan gibi daha ' +
+      'geniş yaşam alanına ihtiyaç duyan türler için gereklidir. ' +
+      'Tel örgü taban kobay yavrularında bacak kırığına yol açabilir.',
+    ref: 'Bölüm 3, s. 54; Bölüm 6, s. 120'
+  },
   metabolism: {
-    id: 'metabolism', name: 'Metabolizma Kafesi',
+    id: 'metabolism', maxOccupants: 1, slots: 1, name: 'Metabolizma Kafesi',
     cost: 4200, maintenance: 26,
     floorArea: 400, height: 18,
     cleaningDifficulty: 2.0,
@@ -86,5 +116,12 @@ export const CAGE_TYPES = {
   }
 };
 
+/**
+ * NOT: `maxOccupants`, taban alanı hesabının üstüne konan bir OYUN SINIRIDIR.
+ * Kitaptaki tablolar bir kafese kaç hayvanın SIĞABİLECEĞİNİ verir; pratikte
+ * grup büyüklüğü ayrıca sınırlıdır. Tel örgü kafes için kitaptaki tanım
+ * esas alınmıştır: "4 damızlık dişi, 1 erkek ve 2-3 haftalık yavruları"
+ * (Bölüm 6, s. 120).
+ */
 export const CAGE_LIST = Object.values(CAGE_TYPES);
 export const getCageType = (id) => CAGE_TYPES[id];

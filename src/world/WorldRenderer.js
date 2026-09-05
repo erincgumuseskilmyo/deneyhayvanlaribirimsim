@@ -65,13 +65,13 @@ export class WorldRenderer {
   }
 
   /** Kafesleri oda içinde ızgara halinde diz */
-  cageLocalPosition(room, index) {
-    const perRow = Math.max(1, Math.floor((room.w - 0.6) / 0.75));
+  cageLocalPosition(room, index, step = 0.75) {
+    const perRow = Math.max(1, Math.floor((room.w - 0.4) / step));
     const col = index % perRow;
     const row = Math.floor(index / perRow);
-    const x = -room.w / 2 + 0.6 + col * 0.75;
-    const z = -room.d / 2 + 0.7 + row * 0.65;
-    return new THREE.Vector3(x, 0.12, Math.min(z, room.d / 2 - 0.5));
+    const x = -room.w / 2 + step * 0.75 + col * step;
+    const z = -room.d / 2 + step * 0.85 + row * step * 0.88;
+    return new THREE.Vector3(x, 0.12, Math.min(z, room.d / 2 - step * 0.6));
   }
 
   syncCages() {
@@ -94,9 +94,14 @@ export class WorldRenderer {
       const room = st.roomById(roomId);
       const roomMesh = this.roomMeshes.get(roomId);
       if (!room || !roomMesh) continue;
+      // Yerleşim adımı odadaki en büyük kafese göre belirlenir, yoksa
+      // geniş kafesler birbirinin içine girer.
+      const step = Math.max(0.75, ...cages.map(
+        (c) => 0.62 * Math.sqrt((c.def.floorArea ?? 800) / 800) * 1.22
+      ));
       cages.forEach((cage, i) => {
         if (this.cageMeshes.has(cage.id)) return;
-        const pos = this.cageLocalPosition(room, i);
+        const pos = this.cageLocalPosition(room, i, step);
         const mesh = this.factory.buildCage(cage, pos);
         roomMesh.add(mesh);
         this.cageMeshes.set(cage.id, mesh);

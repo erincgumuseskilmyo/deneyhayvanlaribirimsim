@@ -32,7 +32,7 @@ npm run dev           # http://localhost:5173
 npm run build         # dist/ üretir
 npm run preview
 npm run build:single  # dist-single/index.html — tek dosya, çift tıkla çalışır
-npm test              # 30 test (tarayıcı gerekmez)
+npm test              # 32 test (tarayıcı gerekmez)
 ```
 
 **Kurulum yapmadan denemek:** `npm run build:single` komutu her şeyi (JS, CSS,
@@ -114,8 +114,11 @@ olayları dinler.
   taban alanı tablolarından (Tablo 3.2-3.7) hesaplanır.
 - **Tesis:** grid üzerinde 16 oda tipi — kitaptaki beş işlev grubuna göre
   (idari, sistem kontrol, servis, üretim/barındırma, operasyon) düzenlenmiş.
-  Oda başına sıcaklık-nem-havalandırma-gürültü simülasyonu ve kitaptaki
-  5 kafes tipi (ayakkabı kutusu, ızgara tabanlı, mikroizolatör, IVC, metabolizma).
+  Oda başına sıcaklık-nem-havalandırma-gürültü simülasyonu ve 7 kafes tipi:
+  ayakkabı kutusu, ızgara tabanlı sürgülü tepsi, mikroizolatör, IVC,
+  damızlık kafesi (1300 cm²), tel örgü kafes (75×75 cm) ve metabolizma kafesi.
+  Geniş kafesler odanın kapasitesinden daha çok yer kaplar ve sahnede
+  gerçekten büyük görünür.
 - **Etik kurul (HADYEK):** kitaptaki dört karar, kırk iş günü süre sınırı ve
   başvuru formunun 16 alanı üzerinden kural tabanlı denetim. "Şartlı olarak uygun"
   kararı, hayvan refahı biriminin izlediği bir ön deney süreci başlatır.
