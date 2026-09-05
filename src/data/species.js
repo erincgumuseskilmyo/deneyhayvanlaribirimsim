@@ -19,7 +19,10 @@ export const SPECIES = {
     id: 'mouse',
     name: 'Fare',
     latin: 'Mus musculus',
-    color: 0xdcd6cc,
+    // Albino (beyaz) fare. Kitap, hayvan deneylerinde çoğunlukla albino
+    // bireylerin tercih edildiğine dikkat çeker (Bölüm 5, s. 107).
+    // Harici GLB modeliyle aynı ton, modelsiz oynanışta da tutarlı görünsün.
+    color: 0xf2efe9,
     scale: 0.26,
 
     // --- Kitaptan (Bölüm 5, s. 96) ---

@@ -17,6 +17,10 @@ python3 tools/blend_to_glb.py <girdi.blend> <cikti.glb> [ileri_yon] [haric_tutul
 |---|---|---|
 | `ileri_yon` | Modelde burnun baktığı eksen: `NEG_Y`, `POS_Y`, `POS_X`, `NEG_X` | `NEG_Y` |
 | `haric_tutulacaklar` | Virgülle ayrılmış nesne adları (zemin, backdrop vb.) | yok |
+| `renk_override` | `MalzemeAdi=RRGGBB` çiftleri, virgülle ayrılmış | yok |
+
+Renk override, hex sRGB değerini Blender'ın beklediği lineer uzaya çevirir —
+hex'i doğrudan yazmak rengi olduğundan koyu gösterir.
 
 Örnek:
 

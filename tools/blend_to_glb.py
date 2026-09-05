@@ -15,6 +15,12 @@ blend_path, out_path = sys.argv[1], sys.argv[2]
 forward = sys.argv[3] if len(sys.argv) > 3 else 'NEG_Y'
 # Dışarıda bırakılacak nesne adları (zemin, backdrop vb.)
 exclude = set(sys.argv[4].split(',')) if len(sys.argv) > 4 else set()
+# Malzeme rengi override: "MalzemeAdi=RRGGBB,Digeri=RRGGBB"
+overrides = {}
+if len(sys.argv) > 5 and sys.argv[5]:
+    for pair in sys.argv[5].split(','):
+        name, _, hexcol = pair.partition('=')
+        overrides[name.strip()] = hexcol.strip().lstrip('#')
 
 bpy.ops.wm.open_mainfile(filepath=blend_path)
 
@@ -37,6 +43,27 @@ for o in list(bpy.data.objects):
         converted.append(o.name)
         o.select_set(False)
 print("Mesh'e çevrilen curve:", converted or "yok")
+
+# --- 2b. Malzeme renklerini değiştir (istenmişse) ---
+def srgb_to_linear(c):
+    """Blender Base Color lineer uzaydadır; hex sRGB'dir."""
+    c = c / 255.0
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+for mat_name, hexcol in overrides.items():
+    mat = bpy.data.materials.get(mat_name)
+    if not mat:
+        print(f"UYARI: '{mat_name}' malzemesi bulunamadı, atlandı")
+        continue
+    r, g, b = (int(hexcol[i:i+2], 16) for i in (0, 2, 4))
+    lin = (srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b), 1.0)
+    done = False
+    for n in mat.node_tree.nodes:
+        if n.type == 'BSDF_PRINCIPLED':
+            n.inputs['Base Color'].default_value = lin
+            done = True
+    mat.diffuse_color = lin
+    print(f"Renk değişti: {mat_name} -> #{hexcol.upper()}" + ("" if done else " (Principled yok, sadece viewport)"))
 
 meshes = [o for o in bpy.data.objects if o.type == 'MESH']
 if not meshes:
