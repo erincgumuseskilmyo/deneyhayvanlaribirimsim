@@ -4,6 +4,7 @@ import { TimeSystem } from './TimeSystem.js';
 import { RNG } from './RNG.js';
 
 import { FacilitySystem, GRID_SIZE } from '../systems/FacilitySystem.js';
+import { CorridorSystem } from '../systems/CorridorSystem.js';
 import { HusbandrySystem } from '../systems/HusbandrySystem.js';
 import { WelfareSystem } from '../systems/WelfareSystem.js';
 import { BreedingSystem } from '../systems/BreedingSystem.js';
@@ -36,12 +37,14 @@ export class Game {
     const bus = this.bus; const st = this.state; const rng = this.rng;
 
     const facility = new FacilitySystem(bus, st, rng);
+    const corridors = new CorridorSystem(bus, st);
     const husbandry = new HusbandrySystem(bus, st, rng);
     const welfare = new WelfareSystem(bus, st, husbandry);
     const breeding = new BreedingSystem(bus, st, rng);
     const staff = new StaffSystem(bus, st, rng);
     const economy = new EconomySystem(bus, st);
     const biosecurity = new BiosecuritySystem(bus, st, rng);
+    biosecurity.corridors = corridors;
     const disease = new DiseaseSystem(bus, st, rng, biosecurity);
     const research = new ResearchSystem(bus, st, rng);
     const ethics = new EthicsSystem(bus, st);
@@ -52,7 +55,7 @@ export class Game {
     const events = new EventSystem(bus, st, rng, { economy, disease, biosecurity });
 
     this.systems = {
-      facility, husbandry, welfare, breeding, staff, economy, biosecurity,
+      facility, corridors, husbandry, welfare, breeding, staff, economy, biosecurity,
       disease, research, ethics, certification, genetics, events, scoring, report
     };
 

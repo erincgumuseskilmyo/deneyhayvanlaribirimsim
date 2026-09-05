@@ -60,6 +60,8 @@ export const TECH = {
   barrier_housing: {
     id: 'barrier_housing', name: 'Bariyerli Yetiştirme', cost: 160000,
     requires: ['ivc_system'], requiresRoom: 'changing', upkeep: 900,
+    // Kitabın koşulu: odanın bir kapısı temiz, diğeri kirli koridora açılmalı (s. 52)
+    requiresBarrierCorridors: true,
     effects: { biosecurity: 14, scientificReputation: 6 },
     setsColonyStatus: 'barrier',
     desc:

@@ -1,4 +1,5 @@
 import { clamp, avg } from '../core/utils.js';
+import { roomCareFactor } from './CorridorSystem.js';
 
 /** Kafesler haftada bir-iki kez değiştirilir (Bölüm 5, s. 109). */
 export const CAGE_CLEAN_INTERVAL_DAYS = 4;
@@ -44,7 +45,13 @@ export class HusbandrySystem {
     const coverage = animals.length === 0 ? 1 : clamp(capacity / animals.length, 0, 1.2);
 
     // --- Kafeslerin kirlenmesi ---
+    // Koridora bağlanmayan odalarda malzeme/kafes taşınması güçleşir, bakım aksar
+    // ("Koridorlar ... kolay geçişi sağlayacak şekilde geniş olmalıdır." s. 50)
+    const roomFactor = new Map();
+    for (const r of st.rooms) roomFactor.set(r.id, roomCareFactor(st, r));
+
     for (const cage of cages) {
+      const cov = coverage * (roomFactor.get(cage.roomId) ?? 1);
       const occ = st.animalsInCage(cage.id);
       const occupants = occ.length;
       const cap = occupants ? cage.capacityForSpecies(occ[0].species, occ[0].weight) : 1;
@@ -52,12 +59,12 @@ export class HusbandrySystem {
       const soilRate = 5 + load * 9;
       cage.soil(soilRate);
       // Yem/su: kapsam düşükse aksama olasılığı artar
-      cage.foodOk = this.rng.next() < 0.35 + coverage * 0.7;
-      cage.waterOk = this.rng.next() < 0.4 + coverage * 0.7;
+      cage.foodOk = this.rng.next() < 0.35 + cov * 0.7;
+      cage.waterOk = this.rng.next() < 0.4 + cov * 0.7;
       // Zenginleştirme, bakıcı varsa yenilenir
       const hasEnricher = st.staff.some((s) => s.def.capabilities.includes('enrichment'));
       const target = (hasEnricher ? 70 : 30) + cage.def.welfareBonus * 1.5;
-      cage.enrichment = clamp(cage.enrichment + (target - cage.enrichment) * 0.15 * coverage);
+      cage.enrichment = clamp(cage.enrichment + (target - cage.enrichment) * 0.15 * cov);
     }
 
     // --- Temizlik ---

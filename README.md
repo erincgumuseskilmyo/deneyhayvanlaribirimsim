@@ -32,7 +32,7 @@ npm run dev           # http://localhost:5173
 npm run build         # dist/ üretir
 npm run preview
 npm run build:single  # dist-single/index.html — tek dosya, çift tıkla çalışır
-npm test              # 32 test (tarayıcı gerekmez)
+npm test              # 38 test (tarayıcı gerekmez)
 ```
 
 **Kurulum yapmadan denemek:** `npm run build:single` komutu her şeyi (JS, CSS,
@@ -48,6 +48,8 @@ Dosya doğrudan açıldığında harici model araması yapılmaz.
 | Sağ tık sürükle | Kaydır (pan) |
 | Tekerlek | Yakınlaş / uzaklaş |
 | Sol panelden oda seç → zemine tık | Oda yerleştir |
+| Koridor seç → zemine tık / sürükle | Koridor karosu döşe (sürükleyerek sıra) |
+| Yıkım modunda koridora tık | Koridor karosunu sök |
 | Sağ tık (inşa modunda) / `Esc` | İnşa modundan çık |
 | Odaya tık | Detay panelini aç |
 | `Boşluk` | Duraklat / devam |
@@ -119,6 +121,16 @@ olayları dinler.
   damızlık kafesi (1300 cm²), tel örgü kafes (75×75 cm) ve metabolizma kafesi.
   Geniş kafesler odanın kapasitesinden daha çok yer kaplar ve sahnede
   gerçekten büyük görünür.
+- **Koridorlar:** kitabın servis alanlarından biri (Bölüm 3, s. 49-51).
+  1×1 karolar hâlinde döşenen **temiz** ve **kirli** koridor olmak üzere iki
+  tip vardır. Bir odanın kenarına değen koridor o odaya kapı açar; köşeden
+  değen karo saymaz. Koridora hiç bağlanmayan odada malzeme ve kafes taşınması
+  güçleştiği için bakım kapsamı düşer, yem/su aksama olasılığı artar.
+  **Bariyerli yetiştirme** teknolojisi, en az bir barındırma odasının bir
+  kenarı temiz, diğer kenarı kirli koridora açılmadan açılamaz — kitabın
+  "kapılardan biri kirli, biri de temiz koridora açılmalıdır" kuralı
+  (s. 52) doğrudan bir yerleşim bulmacası olarak oyuna girer. Oda detay
+  panelinde odanın koridor bağlantısı işaretlerle gösterilir.
 - **Etik kurul (HADYEK):** kitaptaki dört karar, kırk iş günü süre sınırı ve
   başvuru formunun 16 alanı üzerinden kural tabanlı denetim. "Şartlı olarak uygun"
   kararı, hayvan refahı biriminin izlediği bir ön deney süreci başlatır.

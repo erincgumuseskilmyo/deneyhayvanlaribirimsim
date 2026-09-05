@@ -37,6 +37,9 @@ export class BiosecuritySystem {
     score -= this.pestPressure * 0.25;
     score -= this.wasteBacklog * 0.2;
 
+    // Temiz/kirli koridor ayrımı (Bölüm 3, s. 52)
+    score += this.corridors?.biosecurityBonus() ?? 0;
+
     // Teknoloji
     if (st.unlockedTech.has('barrier_housing')) score += 12;
     score += (st.biosafetyLevel - 1) * 5;   // BGS-1..4 (Bölüm 8, s. 175-176)

@@ -6,6 +6,7 @@ import { getCageType } from '../data/cages.js';
 import { getSpecies } from '../data/species.js';
 import { TECH } from '../data/tech.js';
 import { clamp } from '../core/utils.js';
+import { roomCorridorAccess } from './CorridorSystem.js';
 
 export const GRID_SIZE = 26;
 
@@ -39,6 +40,11 @@ export class FacilitySystem {
       if (!(ghost.x + ghost.w <= r.x || r.x + r.w <= ghost.x ||
             ghost.z + ghost.d <= r.z || r.z + r.d <= ghost.z)) {
         return { ok: false, reason: 'Başka bir odayla çakışıyor.' };
+      }
+    }
+    for (const c of st.corridors) {
+      if (c.x >= x && c.x < x + w && c.z >= z && c.z < z + d) {
+        return { ok: false, reason: 'Koridor üzerine oda inşa edilemez.' };
       }
     }
     if (!st.canAfford(def.cost)) return { ok: false, reason: 'Yetersiz bütçe.' };
@@ -231,6 +237,15 @@ export class FacilitySystem {
     }
     if (t.requiresRoom && !st.hasRoom(t.requiresRoom)) {
       return { ok: false, reason: `${getRoomType(t.requiresRoom).name} gerekli.` };
+    }
+    if (t.requiresBarrierCorridors) {
+      const ok = st.animalRooms.some((r) => roomCorridorAccess(st, r).barrierCompliant);
+      if (!ok) {
+        return {
+          ok: false,
+          reason: 'En az bir barındırma odası hem temiz hem kirli koridora açılmalı (s. 52).'
+        };
+      }
     }
     if (t.requiresStaff && st.staffOfRole(t.requiresStaff).length === 0) {
       return { ok: false, reason: 'Veteriner hekim gerekli.' };

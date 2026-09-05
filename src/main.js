@@ -56,10 +56,27 @@ bus.on('build:modeChanged', (m) => {
 
 const canvas = $('#scene');
 
+// Koridor döşerken fareyi basılı tutup sürüklemek karo dizisi çizer.
+let painting = false;
+
+function placeCorridor(gx, gz, { quiet = false } = {}) {
+  const res = systems.corridors.place(buildMode.type, gx, gz);
+  if (!res.ok && !quiet) bus.emit('notify', { text: res.reason, level: 'bad' });
+  if (res.ok) maybeTeachCorridor();
+  return res.ok;
+}
+
 canvas.addEventListener('pointermove', (e) => {
   if (buildMode.mode !== 'build' || !buildMode.type) return;
   const hit = sceneMgr.pointerToGrid(e.clientX, e.clientY);
   if (!hit) return;
+  if (buildMode.kind === 'corridor') {
+    const check = systems.corridors.canPlace(buildMode.type, hit.gx, hit.gz);
+    world.setCorridorGhost(buildMode.type, hit.gx, hit.gz, check.ok);
+    // Sürükleyerek döşeme: geçilen her uygun karoya koridor koy
+    if (painting && check.ok) placeCorridor(hit.gx, hit.gz, { quiet: true });
+    return;
+  }
   const check = systems.facility.canPlace(buildMode.type, hit.gx, hit.gz);
   world.setGhost(buildMode.type, hit.gx, hit.gz, check.ok);
 });
@@ -67,7 +84,10 @@ canvas.addEventListener('pointermove', (e) => {
 canvas.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
   canvas._downAt = { x: e.clientX, y: e.clientY };
+  if (buildMode.mode === 'build' && buildMode.kind === 'corridor') painting = true;
 });
+
+window.addEventListener('pointerup', () => { painting = false; });
 
 canvas.addEventListener('pointerup', (e) => {
   if (e.button !== 0) return;
@@ -78,6 +98,7 @@ canvas.addEventListener('pointerup', (e) => {
   if (buildMode.mode === 'build' && buildMode.type) {
     const hit = sceneMgr.pointerToGrid(e.clientX, e.clientY);
     if (!hit) return;
+    if (buildMode.kind === 'corridor') { placeCorridor(hit.gx, hit.gz); return; }
     const res = systems.facility.placeRoom(buildMode.type, hit.gx, hit.gz);
     if (res.ok) {
       bus.emit('notify', { text: `${res.room.name} inşa edildi.`, level: 'good' });
@@ -89,7 +110,21 @@ canvas.addEventListener('pointerup', (e) => {
   }
 
   const hits = sceneMgr.pick(e.clientX, e.clientY, world.pickableObjects());
-  const found = hits.map((h) => world.resolvePick(h.object)).find((d) => d?.kind === 'room');
+  const picks = hits.map((h) => world.resolvePick(h.object));
+
+  if (buildMode.mode === 'demolish') {
+    const tile = picks.find((d) => d?.kind === 'corridor');
+    if (tile) {
+      const res = systems.corridors.remove(tile.x, tile.z);
+      bus.emit('notify', {
+        text: res.ok ? `Koridor söküldü, ${money(res.refund)} geri kazanıldı.` : res.reason,
+        level: res.ok ? 'good' : 'bad'
+      });
+      return;
+    }
+  }
+
+  const found = picks.find((d) => d?.kind === 'room');
   if (!found) {
     detailPanel.select(null);
     world.setSelection(null);
@@ -131,6 +166,13 @@ const ROOM_TEACH = {
   cleaning: 'hygiene', ivc: 'ivc', genetics: 'gm_animals',
   classroom: 'certificate', food_storage: 'pest'
 };
+function maybeTeachCorridor() {
+  if (taught.has('corridor')) return;
+  if (modal.open || modal.queue.length) return;
+  taught.add('corridor');
+  modal.show({ title: 'Bilgi Kartı', body: '', knowledge: 'corridor' });
+}
+
 function maybeTeach(roomType) {
   const k = ROOM_TEACH[roomType];
   if (!k || taught.has(k)) return;

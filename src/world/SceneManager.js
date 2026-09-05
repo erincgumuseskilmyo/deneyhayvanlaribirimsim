@@ -110,8 +110,10 @@ export class SceneManager {
     this.roomsGroup = new THREE.Group(); this.roomsGroup.name = 'rooms';
     this.cagesGroup = new THREE.Group(); this.cagesGroup.name = 'cages';
     this.animalsGroup = new THREE.Group(); this.animalsGroup.name = 'animals';
+    this.corridorsGroup = new THREE.Group(); this.corridorsGroup.name = 'corridors';
     this.ghostGroup = new THREE.Group(); this.ghostGroup.name = 'ghost';
-    this.scene.add(this.roomsGroup, this.cagesGroup, this.animalsGroup, this.ghostGroup);
+    this.scene.add(this.roomsGroup, this.cagesGroup, this.animalsGroup,
+                   this.corridorsGroup, this.ghostGroup);
   }
 
   resize() {

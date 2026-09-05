@@ -15,6 +15,7 @@ export class WorldRenderer {
     this.factory = new ModelFactory();
 
     this.roomMeshes = new Map();   // roomId -> Object3D
+    this.corridorMeshes = new Map(); // "x,z" -> Object3D
     this.cageMeshes = new Map();   // cageId -> Object3D
     this.animalMeshes = new Map(); // animalId -> Object3D
     this.selectionMesh = null;
@@ -30,7 +31,7 @@ export class WorldRenderer {
    * (Manifest asenkron yüklendiği için sahne çoktan çizilmiş olabilir.)
    */
   reloadModels() {
-    for (const map of [this.animalMeshes, this.cageMeshes, this.roomMeshes]) {
+    for (const map of [this.animalMeshes, this.cageMeshes, this.roomMeshes, this.corridorMeshes]) {
       for (const mesh of map.values()) {
         mesh.parent?.remove(mesh);
         disposeTree(mesh);
@@ -42,6 +43,7 @@ export class WorldRenderer {
 
   sync() {
     this.syncRooms();
+    this.syncCorridors();
     this.syncCages();
     this.syncAnimals();
   }
@@ -61,6 +63,31 @@ export class WorldRenderer {
       const mesh = this.factory.buildRoom(room);
       this.sceneMgr.roomsGroup.add(mesh);
       this.roomMeshes.set(room.id, mesh);
+    }
+  }
+
+  syncCorridors() {
+    const st = this.state;
+    const alive = new Set(st.corridors.map((c) => `${c.x},${c.z}`));
+    for (const [key, mesh] of this.corridorMeshes) {
+      if (!alive.has(key)) {
+        this.sceneMgr.corridorsGroup.remove(mesh);
+        disposeTree(mesh);
+        this.corridorMeshes.delete(key);
+      }
+    }
+    for (const tile of st.corridors) {
+      const key = `${tile.x},${tile.z}`;
+      const existing = this.corridorMeshes.get(key);
+      if (existing) {
+        if (existing.userData.type === tile.type) continue;
+        this.sceneMgr.corridorsGroup.remove(existing);
+        disposeTree(existing);
+        this.corridorMeshes.delete(key);
+      }
+      const mesh = this.factory.buildCorridor(tile);
+      this.sceneMgr.corridorsGroup.add(mesh);
+      this.corridorMeshes.set(key, mesh);
     }
   }
 
@@ -247,6 +274,14 @@ export class WorldRenderer {
     this.sceneMgr.ghostGroup.add(this.ghost);
   }
 
+  setCorridorGhost(typeId, gx, gz, valid) {
+    this.clearGhost();
+    if (!typeId) return;
+    this.ghost = this.factory.buildCorridorGhost(typeId, valid);
+    this.ghost.position.set(gx + 0.5, 0, gz + 0.5);
+    this.sceneMgr.ghostGroup.add(this.ghost);
+  }
+
   clearGhost() {
     if (!this.ghost) return;
     this.sceneMgr.ghostGroup.remove(this.ghost);
@@ -265,7 +300,7 @@ export class WorldRenderer {
   }
 
   pickableObjects() {
-    return [this.sceneMgr.roomsGroup, this.sceneMgr.ground];
+    return [this.sceneMgr.roomsGroup, this.sceneMgr.corridorsGroup, this.sceneMgr.ground];
   }
 }
 

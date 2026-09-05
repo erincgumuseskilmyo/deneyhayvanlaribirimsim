@@ -20,6 +20,7 @@ export class GameState {
 
     // Varlıklar
     this.rooms = [];        // Room[]
+    this.corridors = [];    // {x, z, type: 'clean'|'dirty'} — 1x1 grid karoları
     this.cages = [];        // Cage[]
     this.animals = [];      // Animal[]
     this.staff = [];        // StaffMember[]
@@ -94,6 +95,9 @@ export class GameState {
 
   roomsOfType(type) { return this.rooms.filter((r) => r.type === type); }
   hasRoom(type) { return this.rooms.some((r) => r.type === type); }
+
+  corridorAt(x, z) { return this.corridors.find((c) => c.x === x && c.z === z); }
+  get animalRooms() { return this.rooms.filter((r) => r.def.capacity > 0); }
 
   staffOfRole(role) { return this.staff.filter((s) => s.role === role); }
 

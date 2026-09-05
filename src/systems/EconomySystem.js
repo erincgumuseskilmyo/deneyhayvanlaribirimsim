@@ -1,3 +1,4 @@
+import { CORRIDOR_TYPES } from '../data/corridors.js';
 import { TECH } from '../data/tech.js';
 
 /**
@@ -29,6 +30,8 @@ export class EconomySystem {
     const bedding = st.cages.length * 2.2;
     const maintenance = st.rooms.reduce((s, r) => s + r.def.maintenanceCost, 0) / 30;
     const cageMaint = st.cages.reduce((s, c) => s + c.def.maintenance, 0) / 30;
+    const corridorMaint = st.corridors.reduce(
+      (s, c) => s + (CORRIDOR_TYPES[c.type]?.maintenanceCost ?? 0), 0) / 30;
     const electricity = (st.rooms.reduce((s, r) => s + r.area * 3.2, 0)) * this.energyPriceIndex;
     const vet = st.staffOfRole('veterinarian').length ? st.livingAnimals.length * 0.25 : 0;
     const biosec = st.biosecurity > 0 ? st.rooms.length * 6 : 0;
@@ -36,7 +39,7 @@ export class EconomySystem {
       .reduce((s, id) => s + (TECH[id]?.upkeep ?? 0), 0) / 30;
 
     return {
-      food, water, bedding, maintenance: maintenance + cageMaint,
+      food, water, bedding, maintenance: maintenance + cageMaint + corridorMaint,
       electricity, vet, biosecurity: biosec, tech: techUpkeep
     };
   }

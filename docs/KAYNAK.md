@@ -19,7 +19,7 @@ bu etiket oyun içinde **her kartın altında** gösterilir:
 
 | Etiket | Anlamı | Kart sayısı | Oyunda görünen |
 |---|---|---:|---|
-| `book` | Kaynak kitaptan alınmış; `ref` alanı bölüm/sayfa verir | 35 | "Kaynak: Laboratuvar Hayvanları Yetiştirme ve Sağlığı — Bölüm 2, s. 30" |
+| `book` | Kaynak kitaptan alınmış; `ref` alanı bölüm/sayfa verir | 36 | "Kaynak: Laboratuvar Hayvanları Yetiştirme ve Sağlığı — Bölüm 2, s. 30" |
 | `general` | Kitapta yer almayan, alan literatüründe yaygın bilgi | 1 | "Kitapta yer almayan genel bilgi — kesin bilimsel iddia değildir" |
 | `game` | Tamamen oyun tasarımı kararı | 2 | "Oyun tasarımı kararı (bilimsel iddia değildir)" |
 
@@ -51,6 +51,9 @@ Bu değerler artık uydurma değil, kitaptan gelir ve `tests/book.test.js` ile k
 | Aydınlatma | 12 saat aydınlık / 12 saat karanlık; hayvan odalarında pencere olmamalı | Bölüm 3, s. 48 |
 | Havalandırma | Saatte 7.000-10.000 m³; emilen hava geri verilmez | Bölüm 3, s. 47 |
 | Yem deposu | En fazla 21 °C; yem ve altlık ayrı depolanır | Bölüm 3, s. 49, 59 |
+| Koridorlar | Servis alanlarındandır; malzeme/kafes/hayvan taşınmasına elverecek genişlikte, kolay temizlenip dezenfekte edilebilir; çıkış yolunda ekipman bulunmaz; yönlendirme levhaları ve acil durum telefonu tabelaları asılır | Bölüm 3, s. 49-51 |
+| Koridorda depolama | Yem ve altlık kesinlikle koridorlarda depolanmaz | Bölüm 3, s. 49 |
+| Temiz/kirli koridor | Bariyerli yetiştirmede odanın her iki tarafında kapı bulunur; biri kirli, biri temiz koridora açılır | Bölüm 3, s. 52 |
 | Pelet yem | %24 ham protein, %4 ham yağ, %6 lif | Bölüm 3, s. 59 |
 | Kafes boyutları | Tür başına minimum bölme, hayvan başına taban alanı, minimum yükseklik | Bölüm 3, Tablo 3.2-3.7 |
 | Kafes temizliği | Haftada bir-iki kez; odalar her gün | Bölüm 5, s. 109 |
@@ -91,11 +94,15 @@ Aşağıdakiler bilinçli olarak oyun tasarımı kararıdır ve kodda böyle eti
 - Sertifika modüllerine düşen saat dağılımı (toplamların 40 + 40 olması korunmuştur).
 - Olay sistemi, ekonomi akışı, puanlama ağırlıkları ve harf notu eşikleri.
 - Bir oyun gününün gerçek zamandaki süresi.
+- Koridorun 1×1 karo olarak döşenmesi, karo maliyeti/bakım gideri, koridora
+  bağlı olmayan odadaki bakım cezası (`UNCONNECTED_CARE_PENALTY`) ve temiz/kirli
+  koridor ayrımının biyogüvenlik puanına katkısı. Kitap koridorun "geniş" olmasını
+  ve bariyerli yetiştirmede temiz/kirli ayrımını söyler; sayısal değer vermez.
 
 ## Doğrulama
 
 ```bash
-npm test     # 29 test: 15 simülasyon + 14 kaynak kitap uyumu
+npm test     # 38 test: 21 simülasyon + 17 kaynak kitap uyumu
 ```
 
 `tests/book.test.js` şunları kilitler: sertifika saatleri ve modül başlıkları,
@@ -103,3 +110,6 @@ tür üreme değerleri, sıcaklık/nem tablosu, kafes boyut tabloları ve kapasi
 hesabı, HADYEK’in dört kararı ve kırk iş günü kuralı, başvuru formu alanları,
 hayvan refahı birimi zorunluluğu, SPF/germ-free’nin ağaçta bulunmaması,
 kafes temizlik sıklığı ile tüm bilgi kartı ve quiz referanslarının varlığı.
+`tests/simulation.test.js` ayrıca koridor kurallarını kilitler: karo yerleşimi,
+odaya bitişiklik (köşe komşuluğu kapı açmaz), bariyerli yetiştirmenin temiz+kirli
+koridor koşulu ve koridorsuz odadaki bakım cezası.

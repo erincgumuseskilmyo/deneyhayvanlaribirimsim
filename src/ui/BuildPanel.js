@@ -1,5 +1,6 @@
 import { $, el, clear } from './dom.js';
 import { ROOM_LIST, ROOM_GROUPS } from '../data/rooms.js';
+import { CORRIDOR_LIST } from '../data/corridors.js';
 import { money } from '../core/utils.js';
 
 /**
@@ -13,23 +14,28 @@ export class BuildPanel {
     this.root = $('#build-list');
     this.hint = $('#build-hint');
     this.selectedType = null;
+    this.selectedKind = 'room';   // room | corridor
     this.mode = 'select'; // select | build | demolish
     bus.on('facility:changed', () => this.render());
     bus.on('build:modeChanged', () => this.render());
     this.render();
   }
 
-  setType(typeId) {
-    this.selectedType = this.selectedType === typeId ? null : typeId;
+  setType(typeId, kind = 'room') {
+    const same = this.selectedType === typeId && this.selectedKind === kind;
+    this.selectedType = same ? null : typeId;
+    this.selectedKind = kind;
     this.mode = this.selectedType ? 'build' : 'select';
-    this.bus.emit('build:modeChanged', { mode: this.mode, type: this.selectedType });
+    this.bus.emit('build:modeChanged', {
+      mode: this.mode, type: this.selectedType, kind
+    });
     this.render();
   }
 
   setMode(mode) {
     this.mode = mode;
     if (mode !== 'build') this.selectedType = null;
-    this.bus.emit('build:modeChanged', { mode, type: this.selectedType });
+    this.bus.emit('build:modeChanged', { mode, type: this.selectedType, kind: this.selectedKind });
     this.render();
   }
 
@@ -73,10 +79,29 @@ export class BuildPanel {
       }
     }
 
+    // Koridorlar da servis alanlarındandır (Bölüm 3, s. 49); 1x1 karolar hâlinde döşenir.
+    this.root.append(el('h3', { text: 'Koridorlar (servis alanı)' }));
+    for (const def of CORRIDOR_LIST) {
+      const count = st.corridors.filter((c) => c.type === def.id).length;
+      const active = this.selectedKind === 'corridor' && this.selectedType === def.id;
+      this.root.append(el('button', {
+        class: `wide build-item ${active ? 'active' : ''}`,
+        title: `${def.desc} (${def.ref})`,
+        onClick: () => this.setType(def.id, 'corridor')
+      }, [
+        el('span', { text: `${def.name}${count ? ` ×${count}` : ''}` }),
+        el('small', {
+          text: `${money(def.cost)} · 1×1${st.canAfford(def.cost) ? '' : ' · bütçe yetersiz'}`
+        })
+      ]));
+    }
+
     this.hint.textContent = this.mode === 'build'
-      ? 'Zemine tıklayarak yerleştir. Sağ tık ile iptal.'
+      ? (this.selectedKind === 'corridor'
+          ? 'Koridor karosunu zemine tıklayarak döşe. Sürükleyerek sıra döşeyebilirsin. Sağ tık ile iptal.'
+          : 'Zemine tıklayarak yerleştir. Sağ tık ile iptal.')
       : this.mode === 'demolish'
-        ? 'Yıkmak istediğin odaya tıkla (hayvanlar boşaltılmış olmalı).'
+        ? 'Yıkmak istediğin odaya ya da koridor karosuna tıkla (hayvanlar boşaltılmış olmalı).'
         : 'Bir oda seç, sonra zemine tıkla. Odaya tıklayarak detay panelini aç.';
   }
 }

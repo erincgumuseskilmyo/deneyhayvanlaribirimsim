@@ -394,6 +394,20 @@ export const KNOWLEDGE = {
       'duş, pozitif basınçlı solunum cihazlı elbise, sınıf III kabin ve ayrı havalandırma ' +
       'tesisatı gerekir.'
   },
+  corridor: {
+    id: 'corridor', title: 'Koridorlar', source: 'book', ref: 'Bölüm 3, s. 49-52',
+    text:
+      'Koridorlar tesisin servis alanları arasında yer alır. "Koridorlar, her türlü ihtiyaca ' +
+      'cevap verecek, kolay geçişi sağlayacak şekilde (malzeme, kafes, hayvanların taşınması ' +
+      'vb.) geniş olmalıdır." Zeminler, yan duvarlar, tavanlar ve camlar yıpranmaya dayanıklı, ' +
+      'kolay temizlenebilir ve dezenfekte edilebilir olmalıdır. Olağan dışı bir durumda ' +
+      'kazaları önlemek amacı ile çıkış/kaçış yolu üzerinde alet ve ekipman bulunmamalıdır; ' +
+      'koridorlar üzerinde yönlendirme levhaları ve acil durum telefonlarının bulunduğu ' +
+      'tabelalar uygun yerlere belirli aralıklarla asılmalıdır. Yem ve altlık malzemeleri ' +
+      'kesinlikle koridorlarda, laboratuvarlarda ve deney hayvanı odalarında depolanmamalıdır. ' +
+      'Tesiste bariyerli yetiştirme yapılıyorsa odanın her iki tarafında kapı bulunmalı ve bu ' +
+      'kapılardan biri kirli, biri de temiz koridora açılmalıdır.'
+  },
   quarantine: {
     id: 'quarantine', title: 'Karantina', source: 'book', ref: 'Bölüm 3, s. 52; Bölüm 5, s. 108',
     text:

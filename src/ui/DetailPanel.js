@@ -1,6 +1,7 @@
 import { $, el, clear, kv } from './dom.js';
 import { money, round, avg } from '../core/utils.js';
 import { CAGE_LIST } from '../data/cages.js';
+import { roomCorridorAccess } from '../systems/CorridorSystem.js';
 import { getSpecies } from '../data/species.js';
 
 /**
@@ -37,7 +38,8 @@ export class DetailPanel {
         st.unlockedSpecies.size].join('|');
     }
     const animals = st.animalsInRoom(room.id);
-    return ['room', room.id, Math.round(room.temperature), Math.round(room.humidity),
+    const access = roomCorridorAccess(st, room);
+    return ['room', room.id, access.clean, access.dirty, Math.round(room.temperature), Math.round(room.humidity),
       Math.round(room.ventilation), Math.round(room.hygiene), Math.round(room.noise),
       room.quarantined, room.operational, room.diseaseLevel > 0,
       st.cagesInRoom(room.id).length, animals.length,
@@ -74,6 +76,22 @@ export class DetailPanel {
     this.body.append(kv('Gürültü', `${round(room.noise, 0)}/100`));
     this.body.append(kv('Durum', room.quarantined ? 'KARANTİNA'
       : !room.operational ? 'KAPALI' : room.diseaseLevel > 0 ? 'HASTALIK ŞÜPHESİ' : 'Normal'));
+
+    // Koridor bağlantısı: bariyerli yetiştirmede oda hem temiz hem kirli
+    // koridora açılmalıdır (Bölüm 3, s. 52).
+    const access = roomCorridorAccess(st, room);
+    this.body.append(kv('Koridor', [
+      access.clean ? 'temiz ✓' : 'temiz ✗',
+      access.dirty ? 'kirli ✓' : 'kirli ✗'
+    ].join(' · ')));
+    if (room.def.capacity > 0 && !access.barrierCompliant) {
+      this.body.append(el('p', {
+        class: 'hint',
+        text: access.any
+          ? 'Bariyerli yetiştirme için odanın diğer kenarına da eksik koridor tipi döşenmeli (s. 52).'
+          : 'Oda hiçbir koridora açılmıyor; malzeme ve kafes taşınması güçleştiği için bakım aksıyor (s. 50).'
+      }));
+    }
 
     if (room.def.capacity > 0) {
       this.body.append(el('h3', { text: 'Kafesler ve Hayvanlar' }));
