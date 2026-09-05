@@ -126,7 +126,8 @@ export const SPECIES = {
     id: 'guinea_pig',
     name: 'Kobay',
     latin: 'Cavia porcellus',
-    color: 0xd8c0a8,
+    // Albino kobay — harici GLB modeliyle aynı ton
+    color: 0xf0ece6,
     scale: 0.45,
 
     maturityDays: 60,

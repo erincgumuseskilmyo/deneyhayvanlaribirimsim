@@ -9,6 +9,10 @@
       "file": "animal_rat.glb",
       "fitHeight": 0.17
     },
+    "animal_guinea_pig": {
+      "file": "animal_guinea_pig.glb",
+      "fitHeight": 0.22
+    },
     "animal_rabbit": {
       "file": "animal_rabbit.glb",
       "fitHeight": 0.3
