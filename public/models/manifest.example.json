@@ -1,0 +1,69 @@
+{
+  "_aciklama": [
+    "Bu bir ÖRNEKTİR. Kullanmak için bu dosyayı 'manifest.json' olarak kopyalayın",
+    "ve yalnızca gerçekten ürettiğiniz modelleri bırakın. Listede olup dosyası",
+    "bulunmayan her model, oyunda prosedürel modeliyle çizilmeye devam eder.",
+    "Ayrıntılı kurallar: docs/MODELLER.md"
+  ],
+  "version": 1,
+  "models": {
+    "animal_mouse": {
+      "file": "animal_mouse.glb",
+      "idle": "Idle",
+      "fitHeight": 0.13
+    },
+    "animal_rat": {
+      "file": "animal_rat.glb",
+      "idle": "Idle",
+      "fitHeight": 0.17
+    },
+    "animal_guinea_pig": {
+      "file": "animal_guinea_pig.glb",
+      "idle": "Idle",
+      "fitHeight": 0.22
+    },
+    "animal_gerbil": {
+      "file": "animal_gerbil.glb",
+      "idle": "Idle",
+      "fitHeight": 0.14
+    },
+    "animal_hamster": {
+      "file": "animal_hamster.glb",
+      "idle": "Idle",
+      "fitHeight": 0.15
+    },
+    "animal_rabbit": {
+      "file": "animal_rabbit.glb",
+      "idle": "Idle",
+      "fitHeight": 0.3
+    },
+    "cage_shoebox": {
+      "file": "cage_shoebox.glb",
+      "fitTo": 0.62
+    },
+    "cage_grid_floor": {
+      "file": "cage_grid_floor.glb",
+      "fitTo": 0.62
+    },
+    "cage_microisolator": {
+      "file": "cage_microisolator.glb",
+      "fitTo": 0.62
+    },
+    "cage_ivc": {
+      "file": "cage_ivc.glb",
+      "fitTo": 0.62
+    },
+    "cage_metabolism": {
+      "file": "cage_metabolism.glb",
+      "fitTo": 0.5
+    },
+    "cage_breeding_cage": {
+      "file": "cage_breeding_cage.glb",
+      "fitTo": 0.79
+    },
+    "cage_wire_pen": {
+      "file": "cage_wire_pen.glb",
+      "fitTo": 1.64
+    }
+  }
+}
