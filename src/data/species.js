@@ -23,7 +23,7 @@ export const SPECIES = {
     // bireylerin tercih edildiğine dikkat çeker (Bölüm 5, s. 107).
     // Harici GLB modeliyle aynı ton, modelsiz oynanışta da tutarlı görünsün.
     color: 0xf2efe9,
-    scale: 0.26,
+    scale: 0.32,
 
     // --- Kitaptan (Bölüm 5, s. 96) ---
     maturityDays: 52,            // 7-8 hafta

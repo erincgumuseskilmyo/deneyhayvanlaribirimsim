@@ -50,7 +50,7 @@ odada görünmez. Oyun okunabilirlik için abartılı ölçek kullanır:
 
 | Model | Hedef en uzun kenar (`fitTo`) |
 |---|---|
-| `animal_mouse` | 0,26 |
+| `animal_mouse` | 0,32 |
 | `animal_rat` | 0,36 |
 | `animal_guinea_pig` | 0,45 |
 | `animal_gerbil` | 0,30 |
@@ -146,7 +146,7 @@ Tarayıcı konsolunda:
 Tek bir modeli hızlıca denemek için konsoldan:
 
 ```js
-await __game.world.factory.loadGLTF('animal_mouse', '/models/animal_mouse.glb', { fitTo: 0.26 });
+await __game.world.factory.loadGLTF('animal_mouse', '/models/animal_mouse.glb', { fitTo: 0.32 });
 __game.world.reloadModels();
 ```
 

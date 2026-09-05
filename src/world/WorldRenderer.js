@@ -133,8 +133,19 @@ export class WorldRenderer {
       // Kafesin üst yüzeyine otur: sabit bir yükseklik, harici modellerde
       // hayvanın kapağın içine gömülmesine yol açıyordu.
       const topY = cageMesh.userData.topY ?? 0.33;
-      mesh.position.set((idx - 1) * 0.14, topY, (idx % 2) * 0.1 - 0.05);
-      mesh.rotation.y = Math.random() * Math.PI * 2;
+
+      // Hayvanlar kafesin uzun ekseni boyunca yan yana dizilir ve gövdeleri
+      // kısa eksene bakar. Serbest 360° dönüş, büyük modellerde birbirlerine
+      // geçmelerine yol açıyordu.
+      const spread = (cageMesh.userData.spread ?? 0.19);
+      const side = idx % 2 === 0 ? 1 : -1;
+      mesh.position.set(
+        (idx - 1) * spread,
+        topY,
+        side * 0.03 + (Math.random() - 0.5) * 0.02
+      );
+      // ±90°'ye yakın: uzun kenarları kafesin kısa eksenine hizalanır
+      mesh.rotation.y = side * Math.PI / 2 + (Math.random() - 0.5) * 0.5;
       mesh.userData.wander = { phase: Math.random() * Math.PI * 2, cageId: a.cageId };
       cageMesh.add(mesh);
       this.animalMeshes.set(a.id, mesh);

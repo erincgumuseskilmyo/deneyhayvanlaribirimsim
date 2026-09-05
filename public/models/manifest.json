@@ -1,6 +1,9 @@
 {
   "version": 1,
   "models": {
-    "animal_mouse": { "file": "animal_mouse.glb", "fitTo": 0.26 }
+    "animal_mouse": {
+      "file": "animal_mouse.glb",
+      "fitTo": 0.32
+    }
   }
 }

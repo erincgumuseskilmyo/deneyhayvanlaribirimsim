@@ -305,8 +305,10 @@ export class ModelFactory {
       group.add(pipe);
     }
 
-    // Hayvanların yerleştirileceği üst yüzey — sabit sayı yerine geometriden
+    // Hayvanların yerleştirileceği üst yüzey ve yan yana dizilme aralığı —
+    // sabit sayı yerine kafes geometrisinden türetilir.
     group.userData.topY = h + 0.07;
+    group.userData.spread = scale * 0.31;
 
     group.position.copy(localPos);
     return group;

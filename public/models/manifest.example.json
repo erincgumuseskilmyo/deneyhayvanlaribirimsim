@@ -7,17 +7,55 @@
   ],
   "version": 1,
   "models": {
-    "animal_mouse":      { "file": "animal_mouse.glb",      "fitTo": 0.26, "idle": "Idle" },
-    "animal_rat":        { "file": "animal_rat.glb",        "fitTo": 0.36, "idle": "Idle" },
-    "animal_guinea_pig": { "file": "animal_guinea_pig.glb", "fitTo": 0.45, "idle": "Idle" },
-    "animal_gerbil":     { "file": "animal_gerbil.glb",     "fitTo": 0.30, "idle": "Idle" },
-    "animal_hamster":    { "file": "animal_hamster.glb",    "fitTo": 0.31, "idle": "Idle" },
-    "animal_rabbit":     { "file": "animal_rabbit.glb",     "fitTo": 0.60, "idle": "Idle" },
-
-    "cage_shoebox":       { "file": "cage_shoebox.glb",       "fitTo": 0.62 },
-    "cage_grid_floor":    { "file": "cage_grid_floor.glb",    "fitTo": 0.62 },
-    "cage_microisolator": { "file": "cage_microisolator.glb", "fitTo": 0.62 },
-    "cage_ivc":           { "file": "cage_ivc.glb",           "fitTo": 0.62 },
-    "cage_metabolism":    { "file": "cage_metabolism.glb",    "fitTo": 0.50 }
+    "animal_mouse": {
+      "file": "animal_mouse.glb",
+      "fitTo": 0.32,
+      "idle": "Idle"
+    },
+    "animal_rat": {
+      "file": "animal_rat.glb",
+      "fitTo": 0.36,
+      "idle": "Idle"
+    },
+    "animal_guinea_pig": {
+      "file": "animal_guinea_pig.glb",
+      "fitTo": 0.45,
+      "idle": "Idle"
+    },
+    "animal_gerbil": {
+      "file": "animal_gerbil.glb",
+      "fitTo": 0.3,
+      "idle": "Idle"
+    },
+    "animal_hamster": {
+      "file": "animal_hamster.glb",
+      "fitTo": 0.31,
+      "idle": "Idle"
+    },
+    "animal_rabbit": {
+      "file": "animal_rabbit.glb",
+      "fitTo": 0.6,
+      "idle": "Idle"
+    },
+    "cage_shoebox": {
+      "file": "cage_shoebox.glb",
+      "fitTo": 0.62
+    },
+    "cage_grid_floor": {
+      "file": "cage_grid_floor.glb",
+      "fitTo": 0.62
+    },
+    "cage_microisolator": {
+      "file": "cage_microisolator.glb",
+      "fitTo": 0.62
+    },
+    "cage_ivc": {
+      "file": "cage_ivc.glb",
+      "fitTo": 0.62
+    },
+    "cage_metabolism": {
+      "file": "cage_metabolism.glb",
+      "fitTo": 0.5
+    }
   }
 }
