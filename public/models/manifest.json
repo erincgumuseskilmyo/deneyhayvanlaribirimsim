@@ -3,11 +3,15 @@
   "models": {
     "animal_mouse": {
       "file": "animal_mouse.glb",
-      "fitTo": 0.32
+      "fitHeight": 0.13
+    },
+    "animal_rat": {
+      "file": "animal_rat.glb",
+      "fitHeight": 0.17
     },
     "animal_rabbit": {
       "file": "animal_rabbit.glb",
-      "fitTo": 0.6
+      "fitHeight": 0.3
     }
   }
 }

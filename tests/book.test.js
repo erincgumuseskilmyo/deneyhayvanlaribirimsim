@@ -240,17 +240,25 @@ test('Model manifest örneği koddaki tür ve kafes adlarıyla uyumlu', async ()
   assert.deepEqual(actual.sort(), expected.sort(),
     'manifest.example.json içindeki model adları data/ dosyalarıyla eşleşmeli');
 
-  // Her girdinin dosyası ve ölçek hedefi olmalı
+  // Her girdinin dosyası ve bir ölçek hedefi olmalı
   for (const [name, def] of Object.entries(manifest.models)) {
     assert.ok(def.file?.endsWith('.glb'), `${name}: .glb dosyası belirtilmeli`);
-    assert.ok(typeof def.fitTo === 'number' && def.fitTo > 0, `${name}: fitTo pozitif olmalı`);
+    if (name.startsWith('animal_')) {
+      // Hayvanlarda yükseklik hedefi kullanılır: kuyruk uzunluğu türden türe
+      // çok değiştiği için en uzun kenara göre ölçeklemek gövdeyi ezer.
+      assert.ok(typeof def.fitHeight === 'number' && def.fitHeight > 0,
+        `${name}: fitHeight pozitif olmalı`);
+      assert.ok(def.fitTo === undefined, `${name}: fitTo yerine fitHeight kullanılmalı`);
+    } else {
+      assert.ok(typeof def.fitTo === 'number' && def.fitTo > 0, `${name}: fitTo pozitif olmalı`);
+    }
   }
 
-  // Hayvan modellerinin fitTo değeri, türün oyun ölçeğiyle tutarlı olmalı
-  for (const [id, sp] of Object.entries(SPECIES)) {
-    assert.equal(manifest.models[`animal_${id}`].fitTo, sp.scale,
-      `animal_${id}: fitTo, species.scale ile aynı olmalı`);
-  }
+  // Hayvan yükseklikleri gerçek büyüklük sırasını korumalı
+  const h = (id) => manifest.models[`animal_${id}`].fitHeight;
+  assert.ok(h('mouse') < h('rat'), 'sıçan fareden yüksek görünmeli');
+  assert.ok(h('rat') < h('rabbit'), 'tavşan sıçandan yüksek görünmeli');
+  assert.ok(h('gerbil') < h('guinea_pig'), 'kobay gerbilden yüksek görünmeli');
 });
 
 test('Her tür en az bir kafes tipinde barınabilir', async () => {

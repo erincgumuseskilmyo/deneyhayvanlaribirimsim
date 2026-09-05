@@ -46,16 +46,24 @@ Manifest anahtarları sabittir; oyun bu adlarla arar:
 hayvan odası 4×4 metredir.
 
 **Ölçek gerçek boyut DEĞİLDİR.** Gerçek boyutlu bir fare (7 cm) 4 metrelik bir
-odada görünmez. Oyun okunabilirlik için abartılı ölçek kullanır:
+odada görünmez. Oyun okunabilirlik için abartılı ölçek kullanır.
 
-| Model | Hedef en uzun kenar (`fitTo`) |
+**Hayvanlarda yüksekliğe göre ölçeklenir (`fitHeight`), en uzun kenara göre değil.**
+Kuyruk uzunluğu türden türe çok değişir: sıçan modelinin uzunluk/yükseklik oranı
+4,5 iken farenin 2,7'dir. En uzun kenara göre ölçeklemek, uzun kuyruklu modelin
+gövdesini ezerek sıçanı fareden **kısa** gösteriyordu. Yükseklik hedefi bu
+sorunu ortadan kaldırır.
+
+| Model | Hedef yükseklik (`fitHeight`) |
 |---|---|
-| `animal_mouse` | 0,32 |
-| `animal_rat` | 0,36 |
-| `animal_guinea_pig` | 0,45 |
-| `animal_gerbil` | 0,30 |
-| `animal_hamster` | 0,31 |
-| `animal_rabbit` | 0,60 |
+| `animal_mouse` | 0,13 |
+| `animal_gerbil` | 0,14 |
+| `animal_hamster` | 0,15 |
+| `animal_rat` | 0,17 |
+| `animal_guinea_pig` | 0,22 |
+| `animal_rabbit` | 0,30 |
+
+Kafeslerde en uzun kenar hedefi (`fitTo`) kullanılmaya devam eder.
 | `cage_shoebox` `cage_grid_floor` `cage_microisolator` `cage_ivc` | 0,62 |
 | `cage_breeding_cage` | 0,79 |
 | `cage_wire_pen` | 1,64 |
@@ -64,13 +72,16 @@ odada görünmez. Oyun okunabilirlik için abartılı ölçek kullanır:
 Kafeslerin görsel boyutu taban alanından türetilir (800 cm² → 0,62 birim),
 bu yüzden geniş kafesler sahnede gerçekten büyük görünür.
 
-**Ölçeği tutturamazsanız sorun değil:** manifestteki `fitTo` değeri sayesinde
-yükleyici modeli otomatik olarak bu boyuta ölçekler ve tabanını zemine oturtur.
+**Ölçeği tutturamazsanız sorun değil:** manifestteki `fitHeight` (hayvanlar) ya
+da `fitTo` (kafesler) değeri sayesinde yükleyici modeli otomatik olarak bu
+boyuta ölçekler ve tabanını zemine oturtur.
 Yine de modeli doğru ölçekte çıkarmak, oranların bozulmaması açısından iyidir.
 
 **Yön ve pivot:**
 
-- **+X ileri** (hayvanın burnu +X yönüne baksın)
+- **+X ileri** (hayvanın burnu +X yönüne baksın). Oyun hayvanları kafesin uzun
+  ekseni boyunca hizalar; yanlış yön, uzun gövdeli türlerde hayvanın kafesten
+  taşmasına yol açar.
 - **+Y yukarı**
 - **Pivot noktası tabanın ortasında** (ayakların değdiği düzlem, y=0)
 - Blender'da +Z yukarıdır; **glTF export'unda "+Y Up" seçeneği işaretli olmalı**
@@ -159,7 +170,7 @@ Tarayıcı konsolunda:
 Tek bir modeli hızlıca denemek için konsoldan:
 
 ```js
-await __game.world.factory.loadGLTF('animal_mouse', '/models/animal_mouse.glb', { fitTo: 0.32 });
+await __game.world.factory.loadGLTF('animal_mouse', '/models/animal_mouse.glb', { fitHeight: 0.13 });
 __game.world.reloadModels();
 ```
 

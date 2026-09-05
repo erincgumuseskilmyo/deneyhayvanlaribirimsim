@@ -139,18 +139,18 @@ export class WorldRenderer {
       // hayvanın kapağın içine gömülmesine yol açıyordu.
       const topY = cageMesh.userData.topY ?? 0.33;
 
-      // Hayvanlar kafesin uzun ekseni boyunca yan yana dizilir ve gövdeleri
-      // kısa eksene bakar. Serbest 360° dönüş, büyük modellerde birbirlerine
-      // geçmelerine yol açıyordu.
+      // Hayvanlar kafesin UZUN ekseni (x) boyunca hizalanır ve kısa eksende
+      // (z) kaydırılarak dizilir. Kısa eksene çevirmek, sıçan gibi uzun
+      // gövdeli türlerde hayvanı kafesin dışına taşırıyordu.
       const spread = (cageMesh.userData.spread ?? 0.19);
-      const side = idx % 2 === 0 ? 1 : -1;
+      const side = idx === 0 ? 0 : (idx % 2 === 1 ? 1 : -1);
       mesh.position.set(
-        (idx - 1) * spread,
+        (Math.random() - 0.5) * spread * 0.25,
         topY,
-        side * 0.03 + (Math.random() - 0.5) * 0.02
+        side * spread * 0.42
       );
-      // ±90°'ye yakın: uzun kenarları kafesin kısa eksenine hizalanır
-      mesh.rotation.y = side * Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+      // +X ya da -X'e bakar (kafesin uzun ekseni), küçük bir sapmayla
+      mesh.rotation.y = (side >= 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 0.45;
       mesh.userData.wander = { phase: Math.random() * Math.PI * 2, cageId: a.cageId };
       cageMesh.add(mesh);
       this.animalMeshes.set(a.id, mesh);

@@ -74,8 +74,12 @@ export const SPECIES = {
     id: 'rat',
     name: 'Sıçan',
     latin: 'Rattus norvegicus',
-    color: 0xc9bfb3,
-    scale: 0.36,
+    // Albino sıçan; kitap albino bireylerin tercih edildiğine değinir
+    // (Bölüm 5, s. 97, 107).
+    color: 0xf0ece6,
+    // Kuyruk uzunluğu nedeniyle 0,36 fareyi geçmiyordu: fitTo en uzun kenarı
+    // ölçeklediği için gövde küçük kalıyor. Sıçan fareden belirgin büyük görünmeli.
+    scale: 0.48,
 
     maturityDays: 70,            // tam sperm üretimi ~70. gün
     maturityText: 'yaklaşık 70. gün',

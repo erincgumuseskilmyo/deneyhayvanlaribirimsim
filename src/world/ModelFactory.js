@@ -43,8 +43,11 @@ export class ModelFactory {
    * @param {string} name  MODEL_SLOTS ile üretilen model adı (ör. 'animal_mouse')
    * @param {string} url   dosya yolu
    * @param {object} opts  { fitTo?: number, idle?: string }
-   *   fitTo: modelin en uzun kenarı bu değere (oyun birimi = metre) ölçeklenir.
-   *          Blender'daki ölçek hatalarına karşı koruma sağlar.
+   *   fitTo:     modelin en uzun kenarı bu değere ölçeklenir.
+   *   fitHeight: modelin YÜKSEKLİĞİ bu değere ölçeklenir. Hayvanlarda tercih
+   *              edilir: kuyruk uzunluğu türden türe çok değiştiği için en uzun
+   *              kenara göre ölçeklemek uzun kuyruklu modelin gövdesini ezer.
+   *              İkisi birlikte verilirse fitHeight kazanır.
    *   idle:  sürekli oynatılacak animasyon klibinin adı (yoksa ilk klip).
    */
   async loadGLTF(name, url, opts = {}) {
@@ -58,7 +61,8 @@ export class ModelFactory {
       if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
     });
 
-    if (opts.fitTo) this._fitTo(scene, opts.fitTo);
+    if (opts.fitHeight) this._fitTo(scene, opts.fitHeight, 'height');
+    else if (opts.fitTo) this._fitTo(scene, opts.fitTo);
 
     this.overrides.set(name, {
       scene,
@@ -68,14 +72,16 @@ export class ModelFactory {
     return scene;
   }
 
-  /** Modeli, en uzun kenarı `target` olacak biçimde ölçekler ve tabanını y=0'a oturtur. */
-  _fitTo(object, target) {
+  /**
+   * Modeli ölçekler ve tabanını y=0'a oturtur.
+   * @param {'longest'|'height'} mode  hangi ölçünün `target` olacağı
+   */
+  _fitTo(object, target, mode = 'longest') {
     const box = new THREE.Box3().setFromObject(object);
     const size = box.getSize(new THREE.Vector3());
-    const longest = Math.max(size.x, size.y, size.z);
-    if (longest > 0 && Number.isFinite(longest)) {
-      const k = target / longest;
-      object.scale.multiplyScalar(k);
+    const ref = mode === 'height' ? size.y : Math.max(size.x, size.y, size.z);
+    if (ref > 0 && Number.isFinite(ref)) {
+      object.scale.multiplyScalar(target / ref);
     }
     const box2 = new THREE.Box3().setFromObject(object);
     object.position.y -= box2.min.y;
@@ -113,6 +119,7 @@ export class ModelFactory {
       try {
         await this.loadGLTF(name, fileUrl, {
           fitTo: typeof def === 'object' ? def.fitTo : undefined,
+          fitHeight: typeof def === 'object' ? def.fitHeight : undefined,
           idle: typeof def === 'object' ? def.idle : undefined
         });
         result.loaded.push(name);
