@@ -32,7 +32,7 @@ npm run dev           # http://localhost:5173
 npm run build         # dist/ üretir
 npm run preview
 npm run build:single  # dist-single/index.html — tek dosya, çift tıkla çalışır
-npm test              # 38 test (tarayıcı gerekmez)
+npm test              # 43 test (tarayıcı gerekmez)
 ```
 
 **Kurulum yapmadan denemek:** `npm run build:single` komutu her şeyi (JS, CSS,
@@ -173,6 +173,14 @@ public/models/
 - GLB'de animasyon klibi varsa `AnimationMixer` ile oynatır; aynı türden
   kopyalar senkron oynamasın diye başlangıç zamanını rastgeleleştirir.
 - İskeletli (skinned) modeller `SkeletonUtils` ile doğru kopyalanır.
+
+Depodaki `public/models/` altında hâlihazırda altı hayvan (fare, sıçan, gerbil,
+hamster, kobay, tavşan) ve **kafes rafı** modeli bulunur. Raf, tavşan dışındaki
+barındırma odalarının arka duvarına kurulur ve kafes sayısı arttıkça çoğalır;
+tavşan kitaba göre 75×75 cm tel örgü kafeste, zeminde barındırıldığı için
+(Bölüm 6, s. 120) tavşan odasında raf çizilmez. Kitap, rafları ve kafes
+taşıyıcılarını tesis ekipmanı olarak sayar (Bölüm 8, s. 175); rafın ölçüleri ve
+kaç kafes taşıdığı oyun kararıdır.
 
 Model adları, ölçek/yön/pivot kuralları, poligon bütçesi ve Blender export
 ayarları: [`docs/MODELLER.md`](docs/MODELLER.md)

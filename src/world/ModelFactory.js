@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { getRoomType } from '../data/rooms.js';
 import { getCorridorType } from '../data/corridors.js';
 import { getSpecies } from '../data/species.js';
+import { RACK_W, RACK_D } from './rackLayout.js';
 
 /**
  * LOW-POLY MODEL ÜRETİMİ
@@ -19,6 +20,7 @@ import { getSpecies } from '../data/species.js';
 
 /** Manifestte tanımlanabilecek model adları */
 export const MODEL_SLOTS = {
+  rack: () => 'rack',
   room: (typeId) => `room_${typeId}`,
   cage: (typeId) => `cage_${typeId}`,
   animal: (speciesId) => `animal_${speciesId}`
@@ -387,16 +389,72 @@ export class ModelFactory {
     sign.material.map.needsUpdate = true;
   }
 
-  /** Kafes rafı (görsel dolgu) */
-  buildRack(width, depth) {
+  /**
+   * Kafes rafı: harici GLB varsa ('rack') o kullanılır, yoksa prosedürel
+   * olarak dikmeler + raflar + üstlerinde kafes sıraları üretilir.
+   * (Kitap raf ve kafes taşıyıcılarını tesis ekipmanı sayar — Bölüm 8, s. 175.)
+   */
+  buildRack(width = RACK_W, depth = RACK_D, height = 1.25) {
+    const custom = this._override('rack');
+    if (custom) return custom;
+
     const g = new THREE.Group();
-    const shelf = new THREE.Mesh(
-      new THREE.BoxGeometry(width, 0.05, depth),
-      this.materials.rack.clone()
-    );
-    shelf.position.y = 0.02;
-    shelf.receiveShadow = true;
-    g.add(shelf);
+    const post = 0.035;
+    const frameMat = this.materials.rack.clone();
+
+    for (const sx of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        const leg = new THREE.Mesh(
+          new THREE.BoxGeometry(post, height, post), frameMat
+        );
+        leg.position.set(sx * (width / 2 - post), height / 2, sz * (depth / 2 - post));
+        leg.castShadow = true;
+        g.add(leg);
+      }
+    }
+
+    const shelves = 5;
+    for (let s = 0; s < shelves; s++) {
+      const y = 0.16 + s * ((height - 0.24) / (shelves - 1));
+      const shelf = new THREE.Mesh(
+        new THREE.BoxGeometry(width, 0.022, depth), frameMat
+      );
+      shelf.position.y = y;
+      shelf.receiveShadow = true;
+      g.add(shelf);
+
+      // raf üstünde kafes sırası (sembolik)
+      const perShelf = 5;
+      const cw = (width - 0.08) / perShelf;
+      for (let c = 0; c < perShelf; c++) {
+        const box = new THREE.Mesh(
+          new THREE.BoxGeometry(cw * 0.88, 0.11, depth * 0.82),
+          this.materials.cage.clone()
+        );
+        box.position.set(-width / 2 + 0.04 + cw * (c + 0.5), y + 0.066, 0);
+        box.castShadow = true;
+        g.add(box);
+        const lid = new THREE.Mesh(
+          new THREE.BoxGeometry(cw * 0.9, 0.018, depth * 0.84),
+          this.materials.cageLid.clone()
+        );
+        lid.position.set(box.position.x, y + 0.13, 0);
+        g.add(lid);
+      }
+    }
+
+    // tekerlekler
+    for (const sx of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        const wheel = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.045, 0.045, 0.03, 10),
+          new THREE.MeshLambertMaterial({ color: 0x9e2b2b })
+        );
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(sx * (width / 2 - post), 0.045, sz * (depth / 2 - post));
+        g.add(wheel);
+      }
+    }
     return g;
   }
 

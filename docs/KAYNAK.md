@@ -53,6 +53,7 @@ Bu değerler artık uydurma değil, kitaptan gelir ve `tests/book.test.js` ile k
 | Yem deposu | En fazla 21 °C; yem ve altlık ayrı depolanır | Bölüm 3, s. 49, 59 |
 | Koridorlar | Servis alanlarındandır; malzeme/kafes/hayvan taşınmasına elverecek genişlikte, kolay temizlenip dezenfekte edilebilir; çıkış yolunda ekipman bulunmaz; yönlendirme levhaları ve acil durum telefonu tabelaları asılır | Bölüm 3, s. 49-51 |
 | Koridorda depolama | Yem ve altlık kesinlikle koridorlarda depolanmaz | Bölüm 3, s. 49 |
+| Kafes rafı | Zeminler kafeslerin, **rafların**, kafes taşıyıcılarının ve taşıma arabalarının yıpratmasına dayanıklı olmalıdır | Bölüm 8, s. 175 |
 | Temiz/kirli koridor | Bariyerli yetiştirmede odanın her iki tarafında kapı bulunur; biri kirli, biri temiz koridora açılır | Bölüm 3, s. 52 |
 | Pelet yem | %24 ham protein, %4 ham yağ, %6 lif | Bölüm 3, s. 59 |
 | Kafes boyutları | Tür başına minimum bölme, hayvan başına taban alanı, minimum yükseklik | Bölüm 3, Tablo 3.2-3.7 |
@@ -94,6 +95,8 @@ Aşağıdakiler bilinçli olarak oyun tasarımı kararıdır ve kodda böyle eti
 - Sertifika modüllerine düşen saat dağılımı (toplamların 40 + 40 olması korunmuştur).
 - Olay sistemi, ekonomi akışı, puanlama ağırlıkları ve harf notu eşikleri.
 - Bir oyun gününün gerçek zamandaki süresi.
+- Kafes rafının ölçüleri, bir rafın kaç kafes taşıdığı (12) ve odada kaç raf
+  çizileceği. Kitap rafların varlığını söyler (s. 175), sayı ve ölçü vermez.
 - Koridorun 1×1 karo olarak döşenmesi, karo maliyeti/bakım gideri, koridora
   bağlı olmayan odadaki bakım cezası (`UNCONNECTED_CARE_PENALTY`) ve temiz/kirli
   koridor ayrımının biyogüvenlik puanına katkısı. Kitap koridorun "geniş" olmasını
@@ -102,7 +105,7 @@ Aşağıdakiler bilinçli olarak oyun tasarımı kararıdır ve kodda böyle eti
 ## Doğrulama
 
 ```bash
-npm test     # 38 test: 21 simülasyon + 17 kaynak kitap uyumu
+npm test     # 43 test: 21 simülasyon + 17 kaynak kitap uyumu + 5 kafes rafı yerleşimi
 ```
 
 `tests/book.test.js` şunları kilitler: sertifika saatleri ve modül başlıkları,

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { getRoomType } from '../data/rooms.js';
 import { getSpecies } from '../data/species.js';
+import { rackCount, rackPositions, cageZLimit } from './rackLayout.js';
 
 /**
  * Oyun durumunu (GameState) 3B sahneye yansıtır.
@@ -16,6 +17,7 @@ export class WorldRenderer {
 
     this.roomMeshes = new Map();   // roomId -> Object3D
     this.corridorMeshes = new Map(); // "x,z" -> Object3D
+    this.rackMeshes = new Map();   // roomId -> Object3D[]
     this.cageMeshes = new Map();   // cageId -> Object3D
     this.animalMeshes = new Map(); // animalId -> Object3D
     this.selectionMesh = null;
@@ -31,6 +33,10 @@ export class WorldRenderer {
    * (Manifest asenkron yüklendiği için sahne çoktan çizilmiş olabilir.)
    */
   reloadModels() {
+    for (const racks of this.rackMeshes.values()) {
+      for (const m of racks) { m.parent?.remove(m); disposeTree(m); }
+    }
+    this.rackMeshes.clear();
     for (const map of [this.animalMeshes, this.cageMeshes, this.roomMeshes, this.corridorMeshes]) {
       for (const mesh of map.values()) {
         mesh.parent?.remove(mesh);
@@ -44,6 +50,7 @@ export class WorldRenderer {
   sync() {
     this.syncRooms();
     this.syncCorridors();
+    this.syncRacks();
     this.syncCages();
     this.syncAnimals();
   }
@@ -91,14 +98,47 @@ export class WorldRenderer {
     }
   }
 
-  /** Kafesleri oda içinde ızgara halinde diz */
-  cageLocalPosition(room, index, step = 0.75) {
+  /**
+   * Kafes rafları: tavşan dışındaki barındırma odalarında arka duvara
+   * kafes rafı dizilir (bkz. src/world/rackLayout.js).
+   */
+  syncRacks() {
+    const st = this.state;
+    for (const [id, racks] of this.rackMeshes) {
+      if (!st.roomById(id)) {
+        for (const m of racks) { m.parent?.remove(m); disposeTree(m); }
+        this.rackMeshes.delete(id);
+      }
+    }
+    for (const room of st.rooms) {
+      const roomMesh = this.roomMeshes.get(room.id);
+      if (!roomMesh) continue;
+      const want = rackCount(room, st.cagesInRoom(room.id).length);
+      const have = this.rackMeshes.get(room.id) ?? [];
+      if (have.length === want) continue;
+      for (const m of have) { m.parent?.remove(m); disposeTree(m); }
+      const made = rackPositions(room, want).map((p) => {
+        const mesh = this.factory.buildRack();
+        // Rafın ön yüzü modelde +z'ye bakar; arka duvarda sırtı duvara dönük dursun
+        mesh.rotation.y = Math.PI;
+        mesh.position.set(p.x, 0.02, p.z);
+        roomMesh.add(mesh);
+        return mesh;
+      });
+      if (made.length) this.rackMeshes.set(room.id, made);
+      else this.rackMeshes.delete(room.id);
+    }
+  }
+
+  /** Kafesleri oda içinde ızgara halinde diz (raf şeridi boş bırakılır) */
+  cageLocalPosition(room, index, step = 0.75, zLimit = null) {
     const perRow = Math.max(1, Math.floor((room.w - 0.4) / step));
     const col = index % perRow;
     const row = Math.floor(index / perRow);
     const x = -room.w / 2 + step * 0.75 + col * step;
     const z = -room.d / 2 + step * 0.85 + row * step * 0.88;
-    return new THREE.Vector3(x, 0.12, Math.min(z, room.d / 2 - step * 0.6));
+    const back = (zLimit ?? room.d / 2) - step * 0.6;
+    return new THREE.Vector3(x, 0.12, Math.min(z, back));
   }
 
   syncCages() {
@@ -126,9 +166,10 @@ export class WorldRenderer {
       const step = Math.max(0.75, ...cages.map(
         (c) => 0.62 * Math.sqrt((c.def.floorArea ?? 800) / 800) * 1.22
       ));
+      const zLimit = cageZLimit(room, rackCount(room, cages.length));
       cages.forEach((cage, i) => {
         if (this.cageMeshes.has(cage.id)) return;
-        const pos = this.cageLocalPosition(room, i, step);
+        const pos = this.cageLocalPosition(room, i, step, zLimit);
         const mesh = this.factory.buildCage(cage, pos);
         roomMesh.add(mesh);
         this.cageMeshes.set(cage.id, mesh);

@@ -9,6 +9,14 @@
       "file": "animal_rat.glb",
       "fitHeight": 0.17
     },
+    "animal_gerbil": {
+      "file": "animal_gerbil.glb",
+      "fitHeight": 0.14
+    },
+    "animal_hamster": {
+      "file": "animal_hamster.glb",
+      "fitHeight": 0.15
+    },
     "animal_guinea_pig": {
       "file": "animal_guinea_pig.glb",
       "fitHeight": 0.22
@@ -16,6 +24,10 @@
     "animal_rabbit": {
       "file": "animal_rabbit.glb",
       "fitHeight": 0.3
+    },
+    "rack": {
+      "file": "rack.glb",
+      "fitHeight": 1.25
     }
   }
 }

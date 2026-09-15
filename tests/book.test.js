@@ -233,7 +233,8 @@ test('Model manifest örneği koddaki tür ve kafes adlarıyla uyumlu', async ()
 
   const expected = [
     ...Object.keys(SPECIES).map((id) => `animal_${id}`),
-    ...Object.keys(CAGE_TYPES).map((id) => `cage_${id}`)
+    ...Object.keys(CAGE_TYPES).map((id) => `cage_${id}`),
+    'rack'                     // kafes rafı: mobilya modeli (Bölüm 8, s. 175)
   ];
   const actual = Object.keys(manifest.models);
 
@@ -249,6 +250,10 @@ test('Model manifest örneği koddaki tür ve kafes adlarıyla uyumlu', async ()
       assert.ok(typeof def.fitHeight === 'number' && def.fitHeight > 0,
         `${name}: fitHeight pozitif olmalı`);
       assert.ok(def.fitTo === undefined, `${name}: fitTo yerine fitHeight kullanılmalı`);
+    } else if (name === 'rack') {
+      // Raf, duvar yüksekliğinin altında kalsın diye yüksekliğe göre ölçeklenir.
+      assert.ok(typeof def.fitHeight === 'number' && def.fitHeight > 0,
+        `${name}: fitHeight pozitif olmalı`);
     } else {
       assert.ok(typeof def.fitTo === 'number' && def.fitTo > 0, `${name}: fitTo pozitif olmalı`);
     }

@@ -64,6 +64,10 @@
     "cage_wire_pen": {
       "file": "cage_wire_pen.glb",
       "fitTo": 1.64
+    },
+    "rack": {
+      "file": "rack.glb",
+      "fitHeight": 1.25
     }
   }
 }

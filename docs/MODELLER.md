@@ -39,6 +39,7 @@ Manifest anahtarları sabittir; oyun bu adlarla arar:
 | `animal_mouse` `animal_rat` `animal_guinea_pig` `animal_gerbil` `animal_hamster` `animal_rabbit` | Hayvan türleri |
 | `cage_shoebox` `cage_grid_floor` `cage_microisolator` `cage_ivc` `cage_breeding_cage` `cage_wire_pen` `cage_metabolism` | Kafes tipleri |
 | `room_animal` `room_quarantine` … (`src/data/rooms.js` içindeki `id`) | Oda tipleri |
+| `rack` | Kafes rafı (oda mobilyası) |
 
 ## 4. Ölçek ve yön — en kritik kısım
 
@@ -68,6 +69,13 @@ Kafeslerde en uzun kenar hedefi (`fitTo`) kullanılmaya devam eder.
 | `cage_breeding_cage` | 0,79 |
 | `cage_wire_pen` | 1,64 |
 | `cage_metabolism` | 0,44 |
+
+**Kafes rafı** yüksekliğe göre ölçeklenir: `rack` → `fitHeight` **1,25**. Oda
+duvarı 1,5 birim yüksekliğindedir; raf bunun altında kalmalı ki oda içi
+görünürlüğü kapatmasın. Rafın ön yüzü (su şişelerinin olduğu taraf) modelde
+**-Y**'ye bakmalıdır; oyun rafı arka duvara sırtını verecek biçimde döndürür.
+Raf, tavşan barındıran odalarda çizilmez (tavşan tel örgü kafeste, zeminde
+barındırılır — Bölüm 6, s. 120).
 
 Kafeslerin görsel boyutu taban alanından türetilir (800 cm² → 0,62 birim),
 bu yüzden geniş kafesler sahnede gerçekten büyük görünür.
