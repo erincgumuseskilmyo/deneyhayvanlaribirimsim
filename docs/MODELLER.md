@@ -70,6 +70,10 @@ Kafeslerde en uzun kenar hedefi (`fitTo`) kullanılmaya devam eder.
 | `cage_wire_pen` | 1,64 |
 | `cage_metabolism` | 0,44 |
 
+Manifestteki `file` alanı `public/models/` altındaki bir dosya adı olabileceği
+gibi mutlak bir adres (`https://…`) ya da gömülü veri (`data:model/gltf-binary;base64,…`)
+de olabilir; ikincisi modelleri tek bir dosyaya gömerek dağıtmak için kullanışlıdır.
+
 **Kafes rafı** yüksekliğe göre ölçeklenir: `rack` → `fitHeight` **1,8**. Rafın
 ön yüzü (su şişelerinin olduğu taraf) modelde **-Y**'ye bakmalıdır; oyun rafı
 arka duvara sırtını verecek biçimde döndürür. Raf, tavşan barındıran odalarda

@@ -120,7 +120,11 @@ export class ModelFactory {
     await Promise.all(entries.map(async ([name, def]) => {
       const file = typeof def === 'string' ? def : def.file;
       if (!file) { result.missing.push(name); return; }
-      const fileUrl = `${baseUrl}models/${file}`.replace(/([^:]\/)\/+/g, '$1');
+      // Mutlak adres ya da gömülü veri (data:) doğrudan kullanılır; göreli ad
+      // public/models altından çözülür.
+      const fileUrl = /^(https?:|data:|blob:)/.test(file)
+        ? file
+        : `${baseUrl}models/${file}`.replace(/([^:]\/)\/+/g, '$1');
       try {
         await this.loadGLTF(name, fileUrl, {
           fitTo: typeof def === 'object' ? def.fitTo : undefined,
