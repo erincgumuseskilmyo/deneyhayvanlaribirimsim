@@ -32,7 +32,7 @@ npm run dev           # http://localhost:5173
 npm run build         # dist/ üretir
 npm run preview
 npm run build:single  # dist-single/index.html — tek dosya, çift tıkla çalışır
-npm test              # 43 test (tarayıcı gerekmez)
+npm test              # 44 test (tarayıcı gerekmez)
 ```
 
 **Kurulum yapmadan denemek:** `npm run build:single` komutu her şeyi (JS, CSS,
@@ -176,9 +176,11 @@ public/models/
 
 Depodaki `public/models/` altında hâlihazırda altı hayvan (fare, sıçan, gerbil,
 hamster, kobay, tavşan) ve **kafes rafı** modeli bulunur. Raf, tavşan dışındaki
-barındırma odalarının arka duvarına kurulur ve kafes sayısı arttıkça çoğalır;
-tavşan kitaba göre 75×75 cm tel örgü kafeste, zeminde barındırıldığı için
-(Bölüm 6, s. 120) tavşan odasında raf çizilmez. Kitap, rafları ve kafes
+barındırma odalarının arka duvarına kurulur ve kafes sayısı arttıkça çoğalır.
+Tavşan dışındaki türler **rafın gözlerinde yaşar**: odanın zeminine ayrı kafes
+kutusu konmaz, her kafes bir raf gözüne denk gelir. Tavşan kitaba göre 75×75 cm
+tel örgü kafeste, zeminde barındırıldığı için (Bölüm 6, s. 120) tavşan odasında
+raf çizilmez, kafesler zemine dizilir. Kitap, rafları ve kafes
 taşıyıcılarını tesis ekipmanı olarak sayar (Bölüm 8, s. 175); rafın ölçüleri ve
 kaç kafes taşıdığı oyun kararıdır.
 

@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import { getRoomType } from '../data/rooms.js';
 import { getCorridorType } from '../data/corridors.js';
 import { getSpecies } from '../data/species.js';
-import { RACK_W, RACK_D } from './rackLayout.js';
+import {
+  RACK_W, RACK_D, RACK_H, RACK_COLS, SHELF_Y, SLOT_W, SLOT_D, SLOT_PITCH
+} from './rackLayout.js';
 
 /**
  * LOW-POLY MODEL ÜRETİMİ
@@ -390,68 +392,73 @@ export class ModelFactory {
   }
 
   /**
-   * Kafes rafı: harici GLB varsa ('rack') o kullanılır, yoksa prosedürel
-   * olarak dikmeler + raflar + üstlerinde kafes sıraları üretilir.
+   * Kafes rafı: harici GLB varsa ('rack') o kullanılır, yoksa prosedürel olarak
+   * aynı göz düzenine sahip bir raf üretilir (5 raf x 7 göz) — hayvanlar her iki
+   * durumda da aynı yerlere oturur (bkz. rackLayout.js).
    * (Kitap raf ve kafes taşıyıcılarını tesis ekipmanı sayar — Bölüm 8, s. 175.)
    */
-  buildRack(width = RACK_W, depth = RACK_D, height = 1.25) {
+  buildRack() {
     const custom = this._override('rack');
-    if (custom) return custom;
+    if (custom) {
+      makeCagesTranslucent(custom);
+      return custom;
+    }
 
     const g = new THREE.Group();
-    const post = 0.035;
+    const post = 0.04;
     const frameMat = this.materials.rack.clone();
 
     for (const sx of [-1, 1]) {
       for (const sz of [-1, 1]) {
         const leg = new THREE.Mesh(
-          new THREE.BoxGeometry(post, height, post), frameMat
+          new THREE.BoxGeometry(post, RACK_H, post), frameMat
         );
-        leg.position.set(sx * (width / 2 - post), height / 2, sz * (depth / 2 - post));
+        leg.position.set(
+          sx * (RACK_W / 2 - post), RACK_H / 2, sz * (RACK_D / 2 - post)
+        );
         leg.castShadow = true;
         g.add(leg);
       }
     }
 
-    const shelves = 5;
-    for (let s = 0; s < shelves; s++) {
-      const y = 0.16 + s * ((height - 0.24) / (shelves - 1));
+    SHELF_Y.forEach((y) => {
       const shelf = new THREE.Mesh(
-        new THREE.BoxGeometry(width, 0.022, depth), frameMat
+        new THREE.BoxGeometry(RACK_W - 0.02, 0.018, RACK_D - 0.04), frameMat
       );
-      shelf.position.y = y;
+      shelf.position.y = y - 0.012;
       shelf.receiveShadow = true;
       g.add(shelf);
 
-      // raf üstünde kafes sırası (sembolik)
-      const perShelf = 5;
-      const cw = (width - 0.08) / perShelf;
-      for (let c = 0; c < perShelf; c++) {
-        const box = new THREE.Mesh(
-          new THREE.BoxGeometry(cw * 0.88, 0.11, depth * 0.82),
+      for (let c = 0; c < RACK_COLS; c++) {
+        const x = -(SLOT_PITCH * RACK_COLS) / 2 + SLOT_PITCH * (c + 0.5);
+        const tub = new THREE.Mesh(
+          new THREE.BoxGeometry(SLOT_W, 0.12, SLOT_D),
           this.materials.cage.clone()
         );
-        box.position.set(-width / 2 + 0.04 + cw * (c + 0.5), y + 0.066, 0);
-        box.castShadow = true;
-        g.add(box);
+        tub.position.set(x, y + 0.06, 0);
+        // Polikarbonat kafes: içindeki hayvan görünsün
+        tub.material.transparent = true;
+        tub.material.opacity = 0.42;
+        tub.material.depthWrite = false;
+        tub.castShadow = true;
+        g.add(tub);
         const lid = new THREE.Mesh(
-          new THREE.BoxGeometry(cw * 0.9, 0.018, depth * 0.84),
+          new THREE.BoxGeometry(SLOT_W * 1.04, 0.016, SLOT_D * 1.04),
           this.materials.cageLid.clone()
         );
-        lid.position.set(box.position.x, y + 0.13, 0);
+        lid.position.set(x, y + 0.128, 0);
         g.add(lid);
       }
-    }
+    });
 
-    // tekerlekler
     for (const sx of [-1, 1]) {
       for (const sz of [-1, 1]) {
         const wheel = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.045, 0.045, 0.03, 10),
+          new THREE.CylinderGeometry(0.05, 0.05, 0.03, 10),
           new THREE.MeshLambertMaterial({ color: 0x9e2b2b })
         );
         wheel.rotation.z = Math.PI / 2;
-        wheel.position.set(sx * (width / 2 - post), 0.045, sz * (depth / 2 - post));
+        wheel.position.set(sx * (RACK_W / 2 - post), 0.05, sz * (RACK_D / 2 - post));
         g.add(wheel);
       }
     }
@@ -606,4 +613,22 @@ export class ModelFactory {
     line.position.set(room.x + room.w / 2, 0.9, room.z + room.d / 2);
     return line;
   }
+}
+
+/**
+ * Raf modelindeki polikarbonat kafes gövdelerini yarı saydam yapar; aksi
+ * halde gözde yaşayan hayvan kutunun içinde görünmez kalır. Malzemeler klonlar
+ * arasında paylaşıldığı için bir kez uygulanır.
+ */
+function makeCagesTranslucent(root) {
+  root.traverse((o) => {
+    const mats = Array.isArray(o.material) ? o.material : (o.material ? [o.material] : []);
+    for (const m of mats) {
+      if (!/polikarbonat/i.test(m.name ?? '') || m.userData.__translucent) continue;
+      m.transparent = true;
+      m.opacity = 0.42;
+      m.depthWrite = false;
+      m.userData.__translucent = true;
+    }
+  });
 }

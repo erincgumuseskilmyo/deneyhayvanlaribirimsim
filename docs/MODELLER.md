@@ -70,12 +70,19 @@ Kafeslerde en uzun kenar hedefi (`fitTo`) kullanılmaya devam eder.
 | `cage_wire_pen` | 1,64 |
 | `cage_metabolism` | 0,44 |
 
-**Kafes rafı** yüksekliğe göre ölçeklenir: `rack` → `fitHeight` **1,25**. Oda
-duvarı 1,5 birim yüksekliğindedir; raf bunun altında kalmalı ki oda içi
-görünürlüğü kapatmasın. Rafın ön yüzü (su şişelerinin olduğu taraf) modelde
-**-Y**'ye bakmalıdır; oyun rafı arka duvara sırtını verecek biçimde döndürür.
-Raf, tavşan barındıran odalarda çizilmez (tavşan tel örgü kafeste, zeminde
-barındırılır — Bölüm 6, s. 120).
+**Kafes rafı** yüksekliğe göre ölçeklenir: `rack` → `fitHeight` **1,8**. Rafın
+ön yüzü (su şişelerinin olduğu taraf) modelde **-Y**'ye bakmalıdır; oyun rafı
+arka duvara sırtını verecek biçimde döndürür. Raf, tavşan barındıran odalarda
+çizilmez (tavşan tel örgü kafeste, zeminde barındırılır — Bölüm 6, s. 120).
+
+Tavşan dışındaki türler **rafın gözlerinde yaşar**: zeminde ayrı kafes kutusu
+çizilmez, her kafes bir raf gözüne düşer ve hayvanlar o gözün içinde durur.
+Raf modeli değiştirilecekse `src/world/rackLayout.js` başındaki model ölçüleri
+(yükseklik, genişlik, derinlik, raf plakası yükseklikleri, göz sayısı, kafes
+iç ölçüleri) yeni modele göre güncellenmelidir; oyun göz konumlarını bu
+sabitlerden hesaplar. Modelde kafes gövdesinin malzemesi **"Polikarbonat"**
+adını taşımalıdır: oyun bu malzemeyi yarı saydam yapar, yoksa gözdeki hayvan
+görünmez.
 
 Kafeslerin görsel boyutu taban alanından türetilir (800 cm² → 0,62 birim),
 bu yüzden geniş kafesler sahnede gerçekten büyük görünür.

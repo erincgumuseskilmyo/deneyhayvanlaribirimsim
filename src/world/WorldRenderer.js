@@ -2,7 +2,13 @@ import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { getRoomType } from '../data/rooms.js';
 import { getSpecies } from '../data/species.js';
-import { rackCount, rackPositions, cageZLimit } from './rackLayout.js';
+import {
+  rackCount, rackPositions, usesRacks, cageSlot, slotPosition,
+  SLOT_W, SLOT_D, SLOT_H, RACK_ANIMAL_SCALE, RACK_ANIMALS_PER_CAGE
+} from './rackLayout.js';
+
+/** Rafın zeminden yükselişi (tekerlek payı) */
+const RACK_BASE_Y = 0.02;
 
 /**
  * Oyun durumunu (GameState) 3B sahneye yansıtır.
@@ -117,11 +123,14 @@ export class WorldRenderer {
       const have = this.rackMeshes.get(room.id) ?? [];
       if (have.length === want) continue;
       for (const m of have) { m.parent?.remove(m); disposeTree(m); }
+      // Raflar yeniden kurulunca onlara bağlı kafes yuvaları da düşer;
+      // bir sonraki syncCages/syncAnimals turunda yeniden üretilirler.
+      this.dropRoomCages(room.id);
       const made = rackPositions(room, want).map((p) => {
         const mesh = this.factory.buildRack();
         // Rafın ön yüzü modelde +z'ye bakar; arka duvarda sırtı duvara dönük dursun
         mesh.rotation.y = Math.PI;
-        mesh.position.set(p.x, 0.02, p.z);
+        mesh.position.set(p.x, RACK_BASE_Y, p.z);
         roomMesh.add(mesh);
         return mesh;
       });
@@ -130,15 +139,57 @@ export class WorldRenderer {
     }
   }
 
-  /** Kafesleri oda içinde ızgara halinde diz (raf şeridi boş bırakılır) */
-  cageLocalPosition(room, index, step = 0.75, zLimit = null) {
+  /** Bir odanın kafes yuvalarını ve içindeki hayvanları sahneden düşür */
+  dropRoomCages(roomId) {
+    for (const cage of this.state.cagesInRoom(roomId)) {
+      const mesh = this.cageMeshes.get(cage.id);
+      if (!mesh) continue;
+      for (const [aid, am] of this.animalMeshes) {
+        if (am.parent === mesh) {
+          disposeTree(am);
+          this.animalMeshes.delete(aid);
+        }
+      }
+      mesh.parent?.remove(mesh);
+      disposeTree(mesh);
+      this.cageMeshes.delete(cage.id);
+    }
+  }
+
+  /** Kafesleri oda içinde ızgara halinde diz (yalnızca tavşan odaları) */
+  cageLocalPosition(room, index, step = 0.75) {
     const perRow = Math.max(1, Math.floor((room.w - 0.4) / step));
     const col = index % perRow;
     const row = Math.floor(index / perRow);
     const x = -room.w / 2 + step * 0.75 + col * step;
     const z = -room.d / 2 + step * 0.85 + row * step * 0.88;
-    const back = (zLimit ?? room.d / 2) - step * 0.6;
+    const back = room.d / 2 - step * 0.6;
     return new THREE.Vector3(x, 0.12, Math.min(z, back));
+  }
+
+  /**
+   * Raf gözü: kafesin kendisi rafın modelinde zaten çizilidir, burada yalnızca
+   * hayvanların bağlanacağı boş bir çapa (Group) kurulur. Çapa -90 derece
+   * döndürülür ki hayvanların uzun ekseni gözün derinliğine denk gelsin.
+   */
+  buildSlotAnchor(cage, slot, rackPos) {
+    const p = slotPosition(slot.shelf, slot.col);
+    const anchor = new THREE.Group();
+    // Çapa odaya bağlanır (rafa değil): harici raf modeli ölçeklendiği için
+    // rafın altına eklenen her şey ikinci kez ölçeklenirdi. Rafın ön yüzü
+    // Math.PI döndürülmüş olduğundan göz ekseni x'te ters çevrilir.
+    anchor.position.set(rackPos.x - p.x, RACK_BASE_Y + p.y, rackPos.z + p.z);
+    anchor.rotation.y = -Math.PI / 2;
+    anchor.userData = {
+      kind: 'cage',
+      id: cage.id,
+      rackSlot: true,
+      topY: 0,
+      spread: SLOT_W,
+      limitX: SLOT_D * 0.3,
+      limitZ: SLOT_W * 0.45
+    };
+    return anchor;
   }
 
   syncCages() {
@@ -161,15 +212,33 @@ export class WorldRenderer {
       const room = st.roomById(roomId);
       const roomMesh = this.roomMeshes.get(roomId);
       if (!room || !roomMesh) continue;
+
+      if (usesRacks(room)) {
+        // Tavşan dışındaki türler kafeslerini rafta bulur: zeminde ayrı kafes
+        // kutusu çizilmez, her kafes bir raf gözüne oturur.
+        const racks = this.rackMeshes.get(roomId) ?? [];
+        if (!racks.length) continue;
+        const positions = rackPositions(room, racks.length);
+        cages.forEach((cage, i) => {
+          if (this.cageMeshes.has(cage.id)) return;
+          const slot = cageSlot(i, racks.length);
+          const anchor = this.buildSlotAnchor(
+            cage, slot, positions[Math.min(slot.rack, positions.length - 1)]
+          );
+          roomMesh.add(anchor);
+          this.cageMeshes.set(cage.id, anchor);
+        });
+        continue;
+      }
+
       // Yerleşim adımı odadaki en büyük kafese göre belirlenir, yoksa
       // geniş kafesler birbirinin içine girer.
       const step = Math.max(0.75, ...cages.map(
         (c) => 0.62 * Math.sqrt((c.def.floorArea ?? 800) / 800) * 1.22
       ));
-      const zLimit = cageZLimit(room, rackCount(room, cages.length));
       cages.forEach((cage, i) => {
         if (this.cageMeshes.has(cage.id)) return;
-        const pos = this.cageLocalPosition(room, i, step, zLimit);
+        const pos = this.cageLocalPosition(room, i, step);
         const mesh = this.factory.buildCage(cage, pos);
         roomMesh.add(mesh);
         this.cageMeshes.set(cage.id, mesh);
@@ -183,8 +252,11 @@ export class WorldRenderer {
     const visible = new Set();
     const perCage = new Map();
     for (const a of st.livingAnimals) {
+      const cageMesh = this.cageMeshes.get(a.cageId);
+      // Raf gözü zemin kafesinden dar: orada daha az hayvan çizilir
+      const cap = cageMesh?.userData.rackSlot ? RACK_ANIMALS_PER_CAGE : 3;
       const n = perCage.get(a.cageId) ?? 0;
-      if (n >= 3) continue;
+      if (n >= cap) continue;
       perCage.set(a.cageId, n + 1);
       visible.add(a.id);
     }
@@ -219,7 +291,13 @@ export class WorldRenderer {
       );
       // +X ya da -X'e bakar (kafesin uzun ekseni), küçük bir sapmayla
       mesh.rotation.y = (side >= 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 0.45;
-      mesh.userData.wander = { phase: Math.random() * Math.PI * 2, cageId: a.cageId };
+      if (cageMesh.userData.rackSlot) mesh.scale.multiplyScalar(rackFit(mesh));
+      mesh.userData.wander = {
+        phase: Math.random() * Math.PI * 2,
+        cageId: a.cageId,
+        limitX: cageMesh.userData.limitX ?? 0.2,
+        limitZ: cageMesh.userData.limitZ ?? 0.16
+      };
       cageMesh.add(mesh);
       this.animalMeshes.set(a.id, mesh);
     }
@@ -230,7 +308,8 @@ export class WorldRenderer {
     const st = this.state;
     for (const cage of st.cages) {
       const mesh = this.cageMeshes.get(cage.id);
-      if (!mesh) continue;
+      // Raf gözünde kafes gövdesi rafın modelinde; boyanacak ayrı kutu yok
+      if (!mesh || mesh.userData.rackSlot) continue;
       const body = mesh.children[0];
       if (!body?.material) continue;
       const dirty = cage.cleanliness < 45;
@@ -288,8 +367,8 @@ export class WorldRenderer {
       const t = this.time * 1.2 + w.phase;
       mesh.position.x += Math.sin(t) * 0.0009;
       mesh.position.z += Math.cos(t * 0.7) * 0.0009;
-      mesh.position.x = THREE.MathUtils.clamp(mesh.position.x, -0.2, 0.2);
-      mesh.position.z = THREE.MathUtils.clamp(mesh.position.z, -0.16, 0.16);
+      mesh.position.x = THREE.MathUtils.clamp(mesh.position.x, -w.limitX, w.limitX);
+      mesh.position.z = THREE.MathUtils.clamp(mesh.position.z, -w.limitZ, w.limitZ);
       mesh.rotation.y += Math.sin(t * 0.5) * 0.006;
     }
   }
@@ -365,4 +444,14 @@ function disposeTree(obj) {
     if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose?.());
     else child.material?.dispose?.();
   });
+}
+
+/**
+ * Raf gözüne giren hayvanın ölçek çarpanı: gözün iç yüksekliğini aşan türler
+ * (ör. kobay) tavana girmesin diye ayrıca küçültülür.
+ */
+function rackFit(mesh) {
+  const h = new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3()).y;
+  if (!(h > 0)) return RACK_ANIMAL_SCALE;
+  return Math.min(RACK_ANIMAL_SCALE, (SLOT_H * 0.85) / h);
 }

@@ -95,8 +95,13 @@ Aşağıdakiler bilinçli olarak oyun tasarımı kararıdır ve kodda böyle eti
 - Sertifika modüllerine düşen saat dağılımı (toplamların 40 + 40 olması korunmuştur).
 - Olay sistemi, ekonomi akışı, puanlama ağırlıkları ve harf notu eşikleri.
 - Bir oyun gününün gerçek zamandaki süresi.
-- Kafes rafının ölçüleri, bir rafın kaç kafes taşıdığı (12) ve odada kaç raf
-  çizileceği. Kitap rafların varlığını söyler (s. 175), sayı ve ölçü vermez.
+- Kafes rafının ölçüleri (1,56 × 0,665 × 1,8 birim), 5 kat × 7 göz düzeni, bir
+  rafa düşen kafes sayısı (14) ve odada kaç raf çizileceği (en çok 4). Kitap
+  rafların varlığını söyler (s. 175), sayı ve ölçü vermez.
+- Tavşan dışındaki türlerin raf gözünde barındırılması ve bir gözde en çok iki
+  hayvanın çizilmesi. Kitap hangi türün rafta, hangisinin zeminde tutulacağını
+  yalnızca tavşan için açık biçimde söyler (s. 120); raf gözü görselleştirmesi
+  ve çizilen hayvan sayısı oyun kararıdır.
 - Koridorun 1×1 karo olarak döşenmesi, karo maliyeti/bakım gideri, koridora
   bağlı olmayan odadaki bakım cezası (`UNCONNECTED_CARE_PENALTY`) ve temiz/kirli
   koridor ayrımının biyogüvenlik puanına katkısı. Kitap koridorun "geniş" olmasını
@@ -105,7 +110,7 @@ Aşağıdakiler bilinçli olarak oyun tasarımı kararıdır ve kodda böyle eti
 ## Doğrulama
 
 ```bash
-npm test     # 43 test: 21 simülasyon + 17 kaynak kitap uyumu + 5 kafes rafı yerleşimi
+npm test     # 44 test: 21 simülasyon + 17 kaynak kitap uyumu + 6 kafes rafı yerleşimi
 ```
 
 `tests/book.test.js` şunları kilitler: sertifika saatleri ve modül başlıkları,
