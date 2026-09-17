@@ -1,6 +1,6 @@
 import { $, el, clear } from './dom.js';
 import { ROOM_LIST, ROOM_GROUPS } from '../data/rooms.js';
-import { CORRIDOR_LIST } from '../data/corridors.js';
+import { CORRIDOR } from '../data/corridors.js';
 import { money } from '../core/utils.js';
 
 /**
@@ -80,18 +80,18 @@ export class BuildPanel {
     }
 
     // Koridorlar da servis alanlarındandır (Bölüm 3, s. 49); 1x1 karolar hâlinde döşenir.
-    this.root.append(el('h3', { text: 'Koridorlar (servis alanı)' }));
-    for (const def of CORRIDOR_LIST) {
-      const count = st.corridors.filter((c) => c.type === def.id).length;
-      const active = this.selectedKind === 'corridor' && this.selectedType === def.id;
+    this.root.append(el('h3', { text: 'Koridor (servis alanı)' }));
+    {
+      const count = st.corridors.length;
+      const active = this.selectedKind === 'corridor';
       this.root.append(el('button', {
         class: `wide build-item ${active ? 'active' : ''}`,
-        title: `${def.desc} (${def.ref})`,
-        onClick: () => this.setType(def.id, 'corridor')
+        title: `${CORRIDOR.desc} (${CORRIDOR.ref})`,
+        onClick: () => this.setType(CORRIDOR.id, 'corridor')
       }, [
-        el('span', { text: `${def.name}${count ? ` ×${count}` : ''}` }),
+        el('span', { text: `${CORRIDOR.name}${count ? ` ×${count}` : ''}` }),
         el('small', {
-          text: `${money(def.cost)} · 1×1${st.canAfford(def.cost) ? '' : ' · bütçe yetersiz'}`
+          text: `${money(CORRIDOR.cost)} · 1×1${st.canAfford(CORRIDOR.cost) ? '' : ' · bütçe yetersiz'}`
         })
       ]));
     }

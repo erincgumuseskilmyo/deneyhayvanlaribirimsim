@@ -39,7 +39,7 @@ export class DetailPanel {
     }
     const animals = st.animalsInRoom(room.id);
     const access = roomCorridorAccess(st, room);
-    return ['room', room.id, access.clean, access.dirty, Math.round(room.temperature), Math.round(room.humidity),
+    return ['room', room.id, access.connected, access.twoDoors, Math.round(room.temperature), Math.round(room.humidity),
       Math.round(room.ventilation), Math.round(room.hygiene), Math.round(room.noise),
       room.quarantined, room.operational, room.diseaseLevel > 0,
       st.cagesInRoom(room.id).length, animals.length,
@@ -77,18 +77,18 @@ export class DetailPanel {
     this.body.append(kv('Durum', room.quarantined ? 'KARANTİNA'
       : !room.operational ? 'KAPALI' : room.diseaseLevel > 0 ? 'HASTALIK ŞÜPHESİ' : 'Normal'));
 
-    // Koridor bağlantısı: bariyerli yetiştirmede oda hem temiz hem kirli
-    // koridora açılmalıdır (Bölüm 3, s. 52).
+    // Koridor bağlantısı: bariyerli yetiştirmede odanın her iki tarafında kapı
+    // bulunmalıdır (Bölüm 3, s. 52).
     const access = roomCorridorAccess(st, room);
-    this.body.append(kv('Koridor', [
-      access.clean ? 'temiz ✓' : 'temiz ✗',
-      access.dirty ? 'kirli ✓' : 'kirli ✗'
-    ].join(' · ')));
-    if (room.def.capacity > 0 && !access.barrierCompliant) {
+    const doorCount = Object.values(access.sides).filter(Boolean).length;
+    this.body.append(kv('Koridor', access.connected
+      ? `${doorCount} kapı${access.twoDoors ? ' · karşılıklı ✓' : ''}`
+      : 'bağlantı yok'));
+    if (room.def.capacity > 0 && !access.twoDoors) {
       this.body.append(el('p', {
         class: 'hint',
-        text: access.any
-          ? 'Bariyerli yetiştirme için odanın diğer kenarına da eksik koridor tipi döşenmeli (s. 52).'
+        text: access.connected
+          ? 'Bariyerli yetiştirme için odanın karşı kenarına da koridor döşenmeli (s. 52).'
           : 'Oda hiçbir koridora açılmıyor; malzeme ve kafes taşınması güçleştiği için bakım aksıyor (s. 50).'
       }));
     }

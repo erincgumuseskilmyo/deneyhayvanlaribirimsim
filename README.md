@@ -32,7 +32,7 @@ npm run dev           # http://localhost:5173
 npm run build         # dist/ üretir
 npm run preview
 npm run build:single  # dist-single/index.html — tek dosya, çift tıkla çalışır
-npm test              # 44 test (tarayıcı gerekmez)
+npm test              # 45 test (tarayıcı gerekmez)
 ```
 
 **Kurulum yapmadan denemek:** `npm run build:single` komutu her şeyi (JS, CSS,
@@ -122,15 +122,16 @@ olayları dinler.
   Geniş kafesler odanın kapasitesinden daha çok yer kaplar ve sahnede
   gerçekten büyük görünür.
 - **Koridorlar:** kitabın servis alanlarından biri (Bölüm 3, s. 49-51).
-  1×1 karolar hâlinde döşenen **temiz** ve **kirli** koridor olmak üzere iki
-  tip vardır. Bir odanın kenarına değen koridor o odaya kapı açar; köşeden
-  değen karo saymaz. Koridora hiç bağlanmayan odada malzeme ve kafes taşınması
-  güçleştiği için bakım kapsamı düşer, yem/su aksama olasılığı artar.
-  **Bariyerli yetiştirme** teknolojisi, en az bir barındırma odasının bir
-  kenarı temiz, diğer kenarı kirli koridora açılmadan açılamaz — kitabın
-  "kapılardan biri kirli, biri de temiz koridora açılmalıdır" kuralı
-  (s. 52) doğrudan bir yerleşim bulmacası olarak oyuna girer. Oda detay
-  panelinde odanın koridor bağlantısı işaretlerle gösterilir.
+  1×1 karolar hâlinde döşenen **tek tip** koridor vardır. Bir odanın kenarına
+  değen koridor o odaya kapı açar; köşeden değen karo saymaz. Koridora hiç
+  bağlanmayan odada malzeme ve kafes taşınması güçleştiği için bakım kapsamı
+  düşer, yem/su aksama olasılığı artar. **Bariyerli yetiştirme** teknolojisi,
+  en az bir barındırma odasının **karşılıklı iki kenarı** koridora açılmadan
+  açılamaz — kitabın "odanın her iki tarafında kapı bulunmalı" kuralı (s. 52)
+  bir yerleşim bulmacası olarak oyuna girer. Kitap bu kapılardan birinin kirli,
+  diğerinin temiz koridora açılmasını ister; oyun koridorları temiz/kirli diye
+  ayırmaz, bu bir sadeleştirmedir ve `docs/KAYNAK.md` içinde oyun kararı olarak
+  listelenmiştir. Oda detay panelinde odanın kaç kapısı olduğu gösterilir.
 - **Etik kurul (HADYEK):** kitaptaki dört karar, kırk iş günü süre sınırı ve
   başvuru formunun 16 alanı üzerinden kural tabanlı denetim. "Şartlı olarak uygun"
   kararı, hayvan refahı biriminin izlediği bir ön deney süreci başlatır.

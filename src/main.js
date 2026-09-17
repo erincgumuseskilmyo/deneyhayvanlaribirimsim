@@ -60,7 +60,7 @@ const canvas = $('#scene');
 let painting = false;
 
 function placeCorridor(gx, gz, { quiet = false } = {}) {
-  const res = systems.corridors.place(buildMode.type, gx, gz);
+  const res = systems.corridors.place(gx, gz);
   if (!res.ok && !quiet) bus.emit('notify', { text: res.reason, level: 'bad' });
   if (res.ok) maybeTeachCorridor();
   return res.ok;
@@ -71,8 +71,8 @@ canvas.addEventListener('pointermove', (e) => {
   const hit = sceneMgr.pointerToGrid(e.clientX, e.clientY);
   if (!hit) return;
   if (buildMode.kind === 'corridor') {
-    const check = systems.corridors.canPlace(buildMode.type, hit.gx, hit.gz);
-    world.setCorridorGhost(buildMode.type, hit.gx, hit.gz, check.ok);
+    const check = systems.corridors.canPlace(hit.gx, hit.gz);
+    world.setCorridorGhost(hit.gx, hit.gz, check.ok);
     // Sürükleyerek döşeme: geçilen her uygun karoya koridor koy
     if (painting && check.ok) placeCorridor(hit.gx, hit.gz, { quiet: true });
     return;

@@ -91,13 +91,7 @@ export class WorldRenderer {
     }
     for (const tile of st.corridors) {
       const key = `${tile.x},${tile.z}`;
-      const existing = this.corridorMeshes.get(key);
-      if (existing) {
-        if (existing.userData.type === tile.type) continue;
-        this.sceneMgr.corridorsGroup.remove(existing);
-        disposeTree(existing);
-        this.corridorMeshes.delete(key);
-      }
+      if (this.corridorMeshes.has(key)) continue;
       const mesh = this.factory.buildCorridor(tile);
       this.sceneMgr.corridorsGroup.add(mesh);
       this.corridorMeshes.set(key, mesh);
@@ -394,10 +388,9 @@ export class WorldRenderer {
     this.sceneMgr.ghostGroup.add(this.ghost);
   }
 
-  setCorridorGhost(typeId, gx, gz, valid) {
+  setCorridorGhost(gx, gz, valid) {
     this.clearGhost();
-    if (!typeId) return;
-    this.ghost = this.factory.buildCorridorGhost(typeId, valid);
+    this.ghost = this.factory.buildCorridorGhost(valid);
     this.ghost.position.set(gx + 0.5, 0, gz + 0.5);
     this.sceneMgr.ghostGroup.add(this.ghost);
   }

@@ -268,13 +268,13 @@ test('koridor karosu döşenir, oda üzerine döşenemez ve sökülünce geri ka
   const { corridors, facility } = g.systems;
   assert.equal(facility.placeRoom('animal', 4, 4).ok, true);
 
-  const inside = corridors.canPlace('clean', 4, 4);
+  const inside = corridors.canPlace(4, 4);
   assert.equal(inside.ok, false);
 
-  assert.equal(corridors.place('clean', 3, 4).ok, true);
+  assert.equal(corridors.place(3, 4).ok, true);
   assert.equal(g.state.corridors.length, 1);
   // Aynı karoya ikinci kez döşenemez
-  assert.equal(corridors.place('dirty', 3, 4).ok, false);
+  assert.equal(corridors.place(3, 4).ok, false);
   // Koridorun üzerine oda inşa edilemez
   assert.equal(facility.canPlace('changing', 2, 3).ok, false);
 
@@ -284,29 +284,40 @@ test('koridor karosu döşenir, oda üzerine döşenemez ve sökülünce geri ka
   assert.ok(g.state.money > before);
 });
 
-test('kitap kuralı: bariyerli yetiştirme odanın bir kapısı temiz, diğeri kirli koridora açılmalı', () => {
+test('koridor odaya değdiği kenardan kapı açar, karşılıklı iki kenar iki kapı eder', () => {
   const g = new Game({ seed: 8 });
   const { corridors, facility } = g.systems;
   const room = facility.placeRoom('animal', 6, 6).room;
 
-  assert.equal(corridors.access(room).barrierCompliant, false);
-  corridors.place('clean', 5, 6);
-  assert.equal(corridors.access(room).clean, true);
-  assert.equal(corridors.access(room).barrierCompliant, false);
-  corridors.place('dirty', 6 + room.w, 6);
-  assert.equal(corridors.access(room).dirty, true);
-  assert.equal(corridors.access(room).barrierCompliant, true);
-  assert.equal(corridors.barrierCompliantRooms().length, 1);
+  assert.equal(corridors.access(room).connected, false);
+  corridors.place(5, 6);
+  assert.equal(corridors.access(room).sides.west, true);
+  assert.equal(corridors.access(room).connected, true);
+  assert.equal(corridors.access(room).twoDoors, false);
+  corridors.place(6 + room.w, 6);
+  assert.equal(corridors.access(room).sides.east, true);
+  assert.equal(corridors.access(room).twoDoors, true);
+  assert.equal(corridors.twoDoorRooms().length, 1);
+});
+
+test('aynı kenara döşenen ikinci karo ikinci kapı saymaz', () => {
+  const g = new Game({ seed: 13 });
+  const { corridors, facility } = g.systems;
+  const room = facility.placeRoom('animal', 6, 6).room;
+  corridors.place(5, 6);
+  corridors.place(5, 7);
+  assert.equal(corridors.access(room).connected, true);
+  assert.equal(corridors.access(room).twoDoors, false);
 });
 
 test('köşeden değen koridor karosu odaya kapı açmaz', () => {
   const g = new Game({ seed: 9 });
   const room = g.systems.facility.placeRoom('animal', 6, 6).room;
-  g.systems.corridors.place('clean', 5, 5); // köşe komşusu
-  assert.equal(g.systems.corridors.access(room).any, false);
+  g.systems.corridors.place(5, 5); // köşe komşusu
+  assert.equal(g.systems.corridors.access(room).connected, false);
 });
 
-test('bariyerli yetiştirme teknolojisi temiz+kirli koridor olmadan açılmaz', () => {
+test('bariyerli yetiştirme teknolojisi iki kapılı oda olmadan açılmaz', () => {
   const g = new Game({ seed: 10 });
   const st = g.state;
   const { facility, corridors } = g.systems;
@@ -319,8 +330,9 @@ test('bariyerli yetiştirme teknolojisi temiz+kirli koridor olmadan açılmaz', 
   assert.equal(denied.ok, false);
   assert.match(denied.reason, /koridor/i);
 
-  corridors.place('clean', 5, 6);
-  corridors.place('dirty', 6 + room.w, 6);
+  corridors.place(5, 6);
+  assert.equal(facility.canUnlockTech('barrier_housing').ok, false);
+  corridors.place(6 + room.w, 6);
   assert.equal(facility.canUnlockTech('barrier_housing').ok, true);
 });
 
@@ -329,9 +341,9 @@ test('koridora bağlanmayan odada bakım kapsamı düşer', () => {
   const st = g.state;
   const room = g.systems.facility.placeRoom('animal', 6, 6).room;
   assert.equal(roomCareFactor(st, room), 1);          // hiç koridor yokken ceza yok
-  g.systems.corridors.place('clean', 0, 0);            // uzakta bir koridor
+  g.systems.corridors.place(0, 0);                    // uzakta bir koridor
   assert.ok(roomCareFactor(st, room) < 1);
-  g.systems.corridors.place('clean', 5, 6);            // odaya bitişik
+  g.systems.corridors.place(5, 6);                    // odaya bitişik
   assert.equal(roomCareFactor(st, room), 1);
 });
 
@@ -340,8 +352,8 @@ test('koridorlar biyogüvenlik puanına katkı verir', () => {
   const { facility, corridors, biosecurity } = g.systems;
   const room = facility.placeRoom('animal', 6, 6).room;
   const before = biosecurity.computeScore();
-  corridors.place('clean', 5, 6);
-  corridors.place('dirty', 6 + room.w, 6);
+  corridors.place(5, 6);
+  corridors.place(6 + room.w, 6);
   assert.ok(biosecurity.computeScore() > before);
   assert.ok(corridors.maintenancePerMonth() > 0);
 });

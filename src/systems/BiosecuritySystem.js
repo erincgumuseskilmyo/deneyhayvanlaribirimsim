@@ -37,7 +37,7 @@ export class BiosecuritySystem {
     score -= this.pestPressure * 0.25;
     score -= this.wasteBacklog * 0.2;
 
-    // Temiz/kirli koridor ayrımı (Bölüm 3, s. 52)
+    // Koridor bağlantısı ve iki kapılı odalar (Bölüm 3, s. 49-52)
     score += this.corridors?.biosecurityBonus() ?? 0;
 
     // Teknoloji

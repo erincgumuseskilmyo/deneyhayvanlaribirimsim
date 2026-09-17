@@ -20,7 +20,7 @@ export class GameState {
 
     // Varlıklar
     this.rooms = [];        // Room[]
-    this.corridors = [];    // {x, z, type: 'clean'|'dirty'} — 1x1 grid karoları
+    this.corridors = [];    // {x, z} — 1x1 grid karoları (tek tip koridor)
     this.cages = [];        // Cage[]
     this.animals = [];      // Animal[]
     this.staff = [];        // StaffMember[]

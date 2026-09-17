@@ -103,14 +103,19 @@ Aşağıdakiler bilinçli olarak oyun tasarımı kararıdır ve kodda böyle eti
   yalnızca tavşan için açık biçimde söyler (s. 120); raf gözü görselleştirmesi
   ve çizilen hayvan sayısı oyun kararıdır.
 - Koridorun 1×1 karo olarak döşenmesi, karo maliyeti/bakım gideri, koridora
-  bağlı olmayan odadaki bakım cezası (`UNCONNECTED_CARE_PENALTY`) ve temiz/kirli
-  koridor ayrımının biyogüvenlik puanına katkısı. Kitap koridorun "geniş" olmasını
-  ve bariyerli yetiştirmede temiz/kirli ayrımını söyler; sayısal değer vermez.
+  bağlı olmayan odadaki bakım cezası (`UNCONNECTED_CARE_PENALTY`) ve koridor
+  bağlantısının biyogüvenlik puanına katkısı. Kitap koridorun "geniş" olmasını
+  söyler; sayısal değer vermez.
+- **Koridorun tek tip olması.** Kitap bariyerli yetiştirmede kapılardan birinin
+  kirli, diğerinin temiz koridora açılmasını ister (s. 52). Oyun koridorları
+  temiz/kirli diye ayırmaz; bariyerli yetiştirme için odanın karşılıklı iki
+  kenarının koridora açılmasını (iki kapı) arar. Bu bir sadeleştirmedir; kitabın
+  temiz/kirli kuralı bilgi kartlarında olduğu gibi aktarılmaya devam eder.
 
 ## Doğrulama
 
 ```bash
-npm test     # 44 test: 21 simülasyon + 17 kaynak kitap uyumu + 6 kafes rafı yerleşimi
+npm test     # 45 test: 22 simülasyon + 17 kaynak kitap uyumu + 6 kafes rafı yerleşimi
 ```
 
 `tests/book.test.js` şunları kilitler: sertifika saatleri ve modül başlıkları,
@@ -119,5 +124,6 @@ hesabı, HADYEK’in dört kararı ve kırk iş günü kuralı, başvuru formu a
 hayvan refahı birimi zorunluluğu, SPF/germ-free’nin ağaçta bulunmaması,
 kafes temizlik sıklığı ile tüm bilgi kartı ve quiz referanslarının varlığı.
 `tests/simulation.test.js` ayrıca koridor kurallarını kilitler: karo yerleşimi,
-odaya bitişiklik (köşe komşuluğu kapı açmaz), bariyerli yetiştirmenin temiz+kirli
-koridor koşulu ve koridorsuz odadaki bakım cezası.
+odaya bitişiklik (köşe komşuluğu kapı açmaz; aynı kenardaki ikinci karo ikinci
+kapı saymaz), bariyerli yetiştirmenin iki kapı koşulu ve koridorsuz odadaki
+bakım cezası.

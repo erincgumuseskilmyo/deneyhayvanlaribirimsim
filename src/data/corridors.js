@@ -1,47 +1,36 @@
 /**
  * KORİDORLAR
  *
- * Kaynak: Bölüm 3, s. 49-52.
+ * Kaynak: Bölüm 3, s. 49-51.
  *  - Koridorlar tesisin servis alanları arasında sayılır (s. 49).
  *  - "Koridorlar, her türlü ihtiyaca cevap verecek, kolay geçişi sağlayacak
  *    şekilde (malzeme, kafes, hayvanların taşınması vb.) geniş olmalıdır." (s. 50)
- *  - "Tesis içerisinde bariyerli yetiştirme yapılıyorsa o zaman odanın her iki
- *    tarafında kapı bulunmalı ve bu kapılardan biri kirli, biri de temiz
- *    koridora açılmalıdır." (s. 52)
  *  - "Yem, altlık malzemeleri kesinlikle koridorlarda, laboratuvarlarda ve
  *    deney hayvanı odalarında depolanmamalıdır." (s. 49)
  *
+ * Kitap, bariyerli yetiştirme yapılan tesiste odanın her iki tarafında kapı
+ * bulunmasını ve "bu kapılardan biri kirli, biri de temiz koridora" açılmasını
+ * ister (s. 52). Oyun bu ayrımı tek tip koridorla basitleştirir: koridorun
+ * temiz/kirli sınıfı modellenmez, bariyerli yetiştirme için odanın karşılıklı
+ * iki kenarının koridora açılması (iki kapı) aranır. Bu bir oyun kararıdır.
+ *
  * Maliyet ve bonus değerleri oyun dengesi kararıdır.
  */
-export const CORRIDOR_TYPES = {
-  clean: {
-    id: 'clean',
-    name: 'Temiz Koridor',
-    cost: 3200,
-    maintenanceCost: 12,
-    color: 0xdfe7ef,
-    biosecurityBonus: 1.2,
-    desc:
-      'Temiz malzeme, yıkanmış kafes ve personelin bariyer sonrası geçişi için ' +
-      'ayrılmış koridor. Bariyerli yetiştirmede odanın bir kapısı temiz koridora açılır.',
-    ref: 'Bölüm 3, s. 52'
-  },
-  dirty: {
-    id: 'dirty',
-    name: 'Kirli Koridor',
-    cost: 2600,
-    maintenanceCost: 10,
-    color: 0xe2d8c8,
-    biosecurityBonus: 1.2,
-    desc:
-      'Kirli altlık, kullanılmış kafes ve atığın tesisten çıkarıldığı koridor. ' +
-      'Bariyerli yetiştirmede odanın diğer kapısı kirli koridora açılır.',
-    ref: 'Bölüm 3, s. 52'
-  }
+export const CORRIDOR = {
+  id: 'corridor',
+  name: 'Koridor',
+  cost: 2900,
+  maintenanceCost: 11,
+  color: 0xdfe7ef,
+  desc:
+    'Malzeme, kafes ve hayvanların taşınmasına elverecek genişlikte, kolay ' +
+    'temizlenip dezenfekte edilebilen servis koridoru. Odaya bir kenarından ' +
+    'değdiğinde o odaya kapı açar; yem ve altlık koridorda depolanmaz.',
+  ref: 'Bölüm 3, s. 49-51'
 };
 
-export const CORRIDOR_LIST = Object.values(CORRIDOR_TYPES);
-export const getCorridorType = (id) => CORRIDOR_TYPES[id];
+export const CORRIDOR_LIST = [CORRIDOR];
+export const getCorridorType = () => CORRIDOR;
 
 /** Bağlı olmayan odada bakım kapsamı bu oranda düşer (oyun dengesi). */
 export const UNCONNECTED_CARE_PENALTY = 0.45;

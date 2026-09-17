@@ -239,11 +239,11 @@ export class FacilitySystem {
       return { ok: false, reason: `${getRoomType(t.requiresRoom).name} gerekli.` };
     }
     if (t.requiresBarrierCorridors) {
-      const ok = st.animalRooms.some((r) => roomCorridorAccess(st, r).barrierCompliant);
+      const ok = st.animalRooms.some((r) => roomCorridorAccess(st, r).twoDoors);
       if (!ok) {
         return {
           ok: false,
-          reason: 'En az bir barındırma odası hem temiz hem kirli koridora açılmalı (s. 52).'
+          reason: 'En az bir barındırma odasının karşılıklı iki kenarı koridora açılmalı (s. 52).'
         };
       }
     }

@@ -3,7 +3,7 @@
  *
  * Basamaklar kaynak kitaptaki kavramlara dayandırılmıştır:
  *  - Mikroizolatör ve IVC sistemleri (Bölüm 3, s. 57)
- *  - Bariyerli yetiştirme; temiz/kirli koridor ayrımı (Bölüm 3, s. 52)
+ *  - Bariyerli yetiştirme; odanın iki tarafında kapı (Bölüm 3, s. 52)
  *  - Biyogüvenlik seviyeleri BGS-1…BGS-4 (Bölüm 8, s. 175-176)
  *  - Hayvan refahı birimi (Bölüm 2, s. 28)
  *  - Genetiği değiştirilmiş hayvanlar: transgenik, knockout, knockin,
@@ -60,12 +60,13 @@ export const TECH = {
   barrier_housing: {
     id: 'barrier_housing', name: 'Bariyerli Yetiştirme', cost: 160000,
     requires: ['ivc_system'], requiresRoom: 'changing', upkeep: 900,
-    // Kitabın koşulu: odanın bir kapısı temiz, diğeri kirli koridora açılmalı (s. 52)
+    // Kitabın koşulu: odanın her iki tarafında kapı bulunmalıdır (s. 52).
+    // Oyun bunu karşılıklı iki kenarın koridora açılması olarak arar.
     requiresBarrierCorridors: true,
     effects: { biosecurity: 14, scientificReputation: 6 },
     setsColonyStatus: 'barrier',
     desc:
-      'Odanın her iki tarafında kapı bulunur; kapılardan biri kirli, diğeri temiz koridora ' +
+      'Odanın her iki tarafında kapı bulunur ve oda karşılıklı iki kenarından koridora ' +
       'açılır. Personel temiz çalışma kıyafetiyle çalışır, gerektiğinde duş alır. ' +
       'Tesise giriş-çıkış yönü kontrol altına alınır.',
     ref: 'Bölüm 3, s. 46, 52'

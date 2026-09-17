@@ -565,15 +565,13 @@ export class ModelFactory {
   }
 
   /**
-   * Koridor karosu: 1x1 zemin + kenar şeridi.
-   * Temiz/kirli koridor rengi ile ayrılır (Bölüm 3, s. 52); üzerine
-   * yönlendirme levhası konur (s. 51).
+   * Koridor karosu: 1x1 zemin + yön şeridi (Bölüm 3, s. 49-51).
    */
   buildCorridor(tile) {
-    const def = getCorridorType(tile.type);
+    const def = getCorridorType();
     const group = new THREE.Group();
     group.name = `corridor:${tile.x},${tile.z}`;
-    group.userData = { kind: 'corridor', x: tile.x, z: tile.z, type: tile.type };
+    group.userData = { kind: 'corridor', x: tile.x, z: tile.z };
     group.position.set(tile.x + 0.5, 0, tile.z + 0.5);
 
     const floor = new THREE.Mesh(
@@ -585,18 +583,18 @@ export class ModelFactory {
     floor.userData = group.userData;
     group.add(floor);
 
-    // Zemin şeridi: temiz koridor açık mavi, kirli koridor koyu kum rengi
+    // Zemin şeridi: koridorun yönünü belli eden ince bant
     const stripe = new THREE.Mesh(
       new THREE.BoxGeometry(0.9, 0.02, 0.14),
-      new THREE.MeshBasicMaterial({ color: tile.type === 'clean' ? 0x7fa8cc : 0xb08d5a })
+      new THREE.MeshBasicMaterial({ color: 0x7fa8cc })
     );
     stripe.position.y = 0.085;
     group.add(stripe);
     return group;
   }
 
-  buildCorridorGhost(typeId, valid) {
-    const def = getCorridorType(typeId);
+  buildCorridorGhost(valid) {
+    const def = getCorridorType();
     const group = new THREE.Group();
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.98, 0.2, 0.98),
