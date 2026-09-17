@@ -55,6 +55,11 @@ Dosya doğrudan açıldığında harici model araması yapılmaz.
 | `Boşluk` | Duraklat / devam |
 | `1` `2` `3` | Hız 1× / 2× / 4× |
 
+Arayüz iki panel ve tek bir alt çubuktan oluşur: solda inşaat (koridor +
+katlanır oda grupları), sağda seçili odanın özeti, altta beş sekme
+(Personel, Etik Kurul, Eğitim, Tür & Teknoloji, Raporlar). Uzun listeler
+katlanır bölümlerde durur; açtığın bölüm panel yenilenince kapanmaz.
+
 Kamera dikey açısı sınırlıdır ve yatay bakışa yaklaştıkça duvarlar
 şeffaflaşır, böylece oda içleri her zaman görünür kalır. Her odanın üstünde,
 barındırılan türü gösteren ve kameraya dönük duran bir tabela vardır
@@ -91,7 +96,8 @@ src/
                Genetics, Event, Scoring, Report
   world/       SceneManager (kamera/ışık), ModelFactory (low-poly), WorldRenderer
   ui/          HUD, BuildPanel, DetailPanel, TabBar, Modal, Toasts
-    screens/   Staff, Ethics, Certification, Tech, Report, Quiz, Guide, EndGame
+    screens/   Staff, Ethics, Education (Sertifika+Quiz+Bilgi Bankası),
+               Tech, Report, EndGame
   data/        species, rooms, cages, staffRoles, tech, courseModules,
                researchTemplates, knowledge (bilgi kartları), quizzes
 tests/         node:test ile headless simülasyon testleri

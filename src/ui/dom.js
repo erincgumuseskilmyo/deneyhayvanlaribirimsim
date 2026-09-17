@@ -35,6 +35,19 @@ export function bar(value, max = 100) {
   return el('div', { class: 'bar' }, [el('i', { style: `width:${pct}%` })]);
 }
 
+/**
+ * Katlanır bölüm: uzun listeleri tek başlık altında toplar.
+ * `onToggle` açık/kapalı durumu panel yeniden çizilirken korumak içindir.
+ */
+export function section(title, children, { open = false, onToggle = null } = {}) {
+  const node = el('details', { class: 'section', open: open ? '' : null }, [
+    el('summary', { text: title }),
+    ...[].concat(children).filter(Boolean)
+  ]);
+  if (onToggle) node.addEventListener('toggle', () => onToggle(node.open));
+  return node;
+}
+
 /** Sayısal değere göre renk sınıfı */
 export function tone(v, goodAbove = 65, badBelow = 40) {
   if (v >= goodAbove) return 'good';

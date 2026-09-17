@@ -1,4 +1,4 @@
-import { $, el, clear, kv } from './dom.js';
+import { $, el, clear, kv, section } from './dom.js';
 import { money, round, avg } from '../core/utils.js';
 import { CAGE_LIST } from '../data/cages.js';
 import { roomCorridorAccess } from '../systems/CorridorSystem.js';
@@ -16,8 +16,15 @@ export class DetailPanel {
     this.title = $('#detail-title');
     this.body = $('#detail-body');
     this.selectedRoomId = null;
+    // Katlanır bölümlerin açık/kapalı durumu panel yeniden çizilince korunur.
+    this.openSections = new Set();
     bus.on('facility:changed', () => this.render());
     this.render();
+  }
+
+  toggle(key, open) {
+    if (open) this.openSections.add(key);
+    else this.openSections.delete(key);
   }
 
   select(roomId) {
@@ -68,14 +75,9 @@ export class DetailPanel {
 
     this.body.append(el('p', { class: 'hint', text: room.def.desc }));
 
-    this.body.append(el('h3', { text: 'Fiziki Koşullar' }));
-    this.body.append(kv('Sıcaklık', `${round(room.temperature, 1)} °C`));
-    this.body.append(kv('Bağıl nem', `%${round(room.humidity, 0)}`));
-    this.body.append(kv('Havalandırma', `${round(room.ventilation, 0)}/100`));
-    this.body.append(kv('Hijyen', `${round(room.hygiene, 0)}/100`));
-    this.body.append(kv('Gürültü', `${round(room.noise, 0)}/100`));
     this.body.append(kv('Durum', room.quarantined ? 'KARANTİNA'
       : !room.operational ? 'KAPALI' : room.diseaseLevel > 0 ? 'HASTALIK ŞÜPHESİ' : 'Normal'));
+    this.body.append(kv('Hijyen', `${round(room.hygiene, 0)}/100`));
 
     // Koridor bağlantısı: bariyerli yetiştirmede odanın her iki tarafında kapı
     // bulunmalıdır (Bölüm 3, s. 52).
@@ -93,6 +95,13 @@ export class DetailPanel {
       }));
     }
 
+    this.body.append(section('Fiziki koşullar', [
+      kv('Sıcaklık', `${round(room.temperature, 1)} °C`),
+      kv('Bağıl nem', `%${round(room.humidity, 0)}`),
+      kv('Havalandırma', `${round(room.ventilation, 0)}/100`),
+      kv('Gürültü', `${round(room.noise, 0)}/100`)
+    ], { open: this.openSections.has('physical'), onToggle: (o) => this.toggle('physical', o) }));
+
     if (room.def.capacity > 0) {
       this.body.append(el('h3', { text: 'Kafesler ve Hayvanlar' }));
       this.body.append(kv('Kafes', `${cages.length} / ${room.def.capacity}`));
@@ -107,31 +116,29 @@ export class DetailPanel {
         this.body.append(kv('Satılabilir stok', stock.length));
       }
 
-      this.body.append(el('h3', { text: 'Kafes Al' }));
-      for (const c of CAGE_LIST) {
+      this.body.append(section('Kafes al', CAGE_LIST.map((c) => {
         const blocked = c.requiresRoom && c.requiresRoom !== room.type;
-        this.body.append(el('button', {
+        return el('button', {
           class: 'wide build-item', disabled: blocked ? 'disabled' : null,
           title: c.desc,
           onClick: () => this.buyCages(room.id, c.id)
         }, [
           el('span', { text: `${c.name} ×5` }),
           el('small', { text: blocked ? 'Bu odaya kurulamaz' : `${money(c.cost * 5)} · refah +${c.welfareBonus} · biyogüvenlik +${c.biosecurityBonus}` })
-        ]));
-      }
+        ]);
+      }), { open: this.openSections.has('cages'), onToggle: (o) => this.toggle('cages', o) }));
 
-      this.body.append(el('h3', { text: 'Koloni' }));
-      for (const spId of st.unlockedSpecies) {
+      this.body.append(section('Koloni kur', [...st.unlockedSpecies].map((spId) => {
         const sp = getSpecies(spId);
         const allowed = room.def.allowedSpecies.includes(spId);
-        this.body.append(el('button', {
+        return el('button', {
           class: 'wide build-item', disabled: allowed ? null : 'disabled',
           onClick: () => this.foundColony(room.id, spId)
         }, [
           el('span', { text: `${sp.name} kolonisi kur (4 grup)` }),
           el('small', { text: allowed ? `${money(Math.round(sp.salePrice * 1.4) * 12)} · 12 birey` : 'Bu oda bu türü barındıramaz' })
-        ]));
-      }
+        ]);
+      }), { open: this.openSections.has('colony'), onToggle: (o) => this.toggle('colony', o) }));
 
       if (animals.some((a) => a.experimentalStatus === 'stock' && a.isMature)) {
         this.body.append(el('h3', { text: 'Satış' }));
@@ -141,18 +148,19 @@ export class DetailPanel {
       }
     }
 
-    this.body.append(el('h3', { text: 'Oda İşlemleri' }));
     if (room.quarantined) {
       this.body.append(el('button', {
         class: 'wide', onClick: () => { room.quarantined = false; this.bus.emit('facility:changed'); }
       }, 'Karantinayı kaldır'));
     }
-    this.body.append(el('button', {
-      class: 'wide', onClick: () => this.deepClean(room.id)
-    }, `Derin temizlik (${money(4000 + cages.length * 250)})`));
-    this.body.append(el('button', {
-      class: 'wide danger', onClick: () => this.demolish(room.id)
-    }, 'Odayı yık'));
+    this.body.append(section('Oda işlemleri', [
+      el('button', {
+        class: 'wide', onClick: () => this.deepClean(room.id)
+      }, `Derin temizlik (${money(4000 + cages.length * 250)})`),
+      el('button', {
+        class: 'wide danger', onClick: () => this.demolish(room.id)
+      }, 'Odayı yık')
+    ], { open: this.openSections.has('roomOps'), onToggle: (o) => this.toggle('roomOps', o) }));
   }
 
   renderFacilitySummary() {
@@ -163,15 +171,18 @@ export class DetailPanel {
     this.body.append(kv('Hayvan', animals.length));
     this.body.append(kv('Personel', st.staff.length));
     this.body.append(kv('Hijyen', Math.round(st.hygiene)));
-    this.body.append(kv('Barındırma statüsü', {
-      conventional: 'Konvansiyonel', barrier: 'Bariyerli yetiştirme'
-    }[st.colonyStatus]));
-    this.body.append(kv('Biyogüvenlik seviyesi', `BGS-${st.biosafetyLevel}`));
-    this.body.append(kv('Hayvan refahı birimi', st.hasWelfareUnit ? 'VAR' : 'YOK'));
-    this.body.append(kv('Çalışma izni', st.hasOperatingLicense ? 'VAR' : 'YOK'));
-    this.body.append(kv('HADYEK', st.hadyekEstablished ? 'Kuruldu' : 'Kurulmadı'));
-    this.body.append(kv('Pest baskısı', Math.round(this.sys.biosecurity.pestPressure)));
-    this.body.append(kv('Atık birikimi', Math.round(this.sys.biosecurity.wasteBacklog)));
+
+    this.body.append(section('Tesis durumu', [
+      kv('Barındırma statüsü', {
+        conventional: 'Konvansiyonel', barrier: 'Bariyerli yetiştirme'
+      }[st.colonyStatus]),
+      kv('Biyogüvenlik seviyesi', `BGS-${st.biosafetyLevel}`),
+      kv('Hayvan refahı birimi', st.hasWelfareUnit ? 'VAR' : 'YOK'),
+      kv('Çalışma izni', st.hasOperatingLicense ? 'VAR' : 'YOK'),
+      kv('HADYEK', st.hadyekEstablished ? 'Kuruldu' : 'Kurulmadı'),
+      kv('Pest baskısı', Math.round(this.sys.biosecurity.pestPressure)),
+      kv('Atık birikimi', Math.round(this.sys.biosecurity.wasteBacklog))
+    ], { open: this.openSections.has('facility'), onToggle: (o) => this.toggle('facility', o) }));
 
     this.body.append(el('h3', { text: 'Hızlı İşlemler' }));
     if (!st.hasOperatingLicense) {
@@ -188,7 +199,7 @@ export class DetailPanel {
       'Atıkları bertaraf et'));
 
     this.body.append(el('h3', { text: 'Son Olaylar' }));
-    for (const l of st.log.slice(0, 8)) {
+    for (const l of st.log.slice(0, 5)) {
       this.body.append(el('div', { class: 'list-item' }, [
         el('span', { class: `tag ${l.level === 'good' ? 'good' : l.level === 'bad' ? 'bad' : l.level === 'warn' ? 'warn' : ''}`, text: `G${l.day}` }),
         l.text

@@ -1,21 +1,24 @@
 import { $, el, clear } from './dom.js';
 import { staffScreen } from './screens/StaffScreen.js';
 import { ethicsScreen } from './screens/EthicsScreen.js';
-import { certificationScreen } from './screens/CertificationScreen.js';
 import { techScreen } from './screens/TechScreen.js';
 import { reportScreen } from './screens/ReportScreen.js';
-import { quizScreen } from './screens/QuizScreen.js';
-import { guideScreen } from './screens/GuideScreen.js';
+import { educationScreen } from './screens/EducationScreen.js';
 
+/**
+ * Alt çubuk beş sekmeye indirildi: sertifika, quiz ve bilgi bankası tek
+ * "Eğitim" penceresinde alt sekme olarak toplanır.
+ */
 const TABS = [
   { id: 'staff', label: '👥 Personel', title: 'Personel Yönetimi', render: staffScreen },
   { id: 'ethics', label: '⚖ Etik Kurul', title: 'HADYEK — Etik Kurul Değerlendirmesi', render: ethicsScreen },
-  { id: 'certification', label: '🎓 Sertifika', title: 'Deney Hayvanları Kullanım Sertifika Programı', render: certificationScreen },
+  { id: 'education', label: '🎓 Eğitim', title: 'Eğitim — Sertifika, Quiz ve Bilgi Bankası', render: educationScreen },
   { id: 'tech', label: '🧬 Tür & Teknoloji', title: 'Türler ve Teknoloji Ağacı', render: techScreen },
-  { id: 'report', label: '📊 Raporlar', title: 'Raporlar', render: reportScreen },
-  { id: 'quiz', label: '📝 Quiz', title: 'Bölüm Quizleri', render: quizScreen },
-  { id: 'guide', label: '📚 Bilgi Bankası', title: 'Bilgi Bankası', render: guideScreen }
+  { id: 'report', label: '📊 Raporlar', title: 'Raporlar', render: reportScreen }
 ];
+
+/** Eski sekme adları (bilgi kartları, olaylar) Eğitim ekranının alt sekmesine yönlenir. */
+const ALIASES = { certification: 'certification', quiz: 'quiz', guide: 'guide' };
 
 export class TabBar {
   constructor(state, systems, bus, modal) {
@@ -50,14 +53,15 @@ export class TabBar {
   badge(id) {
     const st = this.state;
     if (id === 'ethics') return st.applications.length || null;
-    if (id === 'certification') return st.courses.filter((c) => c.status !== 'finished').length || null;
+    if (id === 'education') return st.courses.filter((c) => c.status !== 'finished').length || null;
     return null;
   }
 
   open(id) {
-    const tab = TABS.find((t) => t.id === id);
+    const sub = ALIASES[id];
+    const tab = TABS.find((t) => t.id === (sub ? 'education' : id));
     if (!tab) return;
-    const body = tab.render(this.state, this.systems, this.bus, this.modal);
+    const body = tab.render(this.state, this.systems, this.bus, this.modal, sub);
     this.modal.show({ title: tab.title, body, actions: [{ label: 'Kapat', primary: true }] });
   }
 }

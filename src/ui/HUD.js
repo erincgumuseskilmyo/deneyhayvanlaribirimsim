@@ -2,13 +2,13 @@ import { $, el, clear, bar, tone } from './dom.js';
 import { money, formatGameDate } from '../core/utils.js';
 
 const STATS = [
-  { key: 'money', label: 'MONEY', fmt: (v) => money(v), bar: false },
-  { key: 'animalWelfare', label: 'ANIMAL_WELFARE' },
-  { key: 'biosecurity', label: 'BIOSECURITY' },
-  { key: 'ethics', label: 'ETHICS' },
-  { key: 'scientificReputation', label: 'SCIENTIFIC_REPUTATION' },
-  { key: 'staffMorale', label: 'STAFF_MORALE' },
-  { key: 'facilityLevel', label: 'FACILITY_LEVEL', fmt: (v) => `Seviye ${v}`, bar: false }
+  { key: 'money', label: 'Bütçe', fmt: (v) => money(v), bar: false },
+  { key: 'animalWelfare', label: 'Refah' },
+  { key: 'biosecurity', label: 'Biyogüvenlik' },
+  { key: 'ethics', label: 'Etik' },
+  { key: 'scientificReputation', label: 'Bilimsel itibar' },
+  { key: 'staffMorale', label: 'Personel morali' },
+  { key: 'facilityLevel', label: 'Tesis', fmt: (v) => `Seviye ${v}`, bar: false }
 ];
 
 export class HUD {
